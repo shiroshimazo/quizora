@@ -1,1 +1,206 @@
+.login-page {
+    -fx-background-color: #F7FAFC;
+    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-smoothing-type: lcd;
+}
 
+.branding-panel {
+    -fx-background-color: #F7FAFC;
+}
+
+.branding-image {
+    -fx-background-color: #F7FAFC;
+}
+
+.login-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #EEF2F3;
+    -fx-border-width: 0 0 0 1px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.login-form {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 20px 70px 45px 70px;
+}
+
+.login-title {
+    -fx-text-fill: #253238;
+    -fx-font-family: "Satoshi Variable Bold";
+    -fx-font-size: 28px;
+    -fx-font-weight: 600;
+}
+
+.login-subtitle {
+    -fx-text-fill: #8A979C;
+    -fx-font-family: "Satoshi Variable Semibold";
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.field-label-row {
+    -fx-min-height: 16px;
+    -fx-pref-height: 16px;
+}
+
+.field-input {
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.field-icon {
+    -fx-fill: transparent;
+    -fx-stroke: #000000;
+    -fx-stroke-width: 1px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-opacity: 1;
+}
+
+.field-label {
+    -fx-text-fill: #425157;
+    -fx-font-family: "Satoshi Variable Semibold";
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+}
+
+.login-field {
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 5px;
+    -fx-border-color: #E1E9EB;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-padding: 0px 12px 0px 12px;
+    -fx-text-fill: #253238;
+    -fx-font-family: "Satoshi Variable Light";
+    -fx-prompt-text-fill: #A9B2B5;
+    -fx-font-size: 12px;
+    -fx-font-weight: 300;
+}
+
+.login-field-with-icon {
+    -fx-padding: 0px 12px 0px 34px;
+}
+
+.login-field:hover {
+    -fx-border-color: #B7D9DC;
+}
+
+.login-field:focused {
+    -fx-border-color: #73C6C9;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(115, 198, 201, 0.22), 7, 0.15, 0, 1);
+}
+
+.options-row {
+    -fx-min-height: 24px;
+    -fx-pref-height: 24px;
+}
+
+.show-password {
+    -fx-text-fill: #8A979C;
+    -fx-font-family: "Satoshi Variable Light";
+    -fx-font-size: 11px;
+    -fx-font-weight: 300;
+}
+
+.show-password .box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #C8D1D3;
+    -fx-border-width: 1px;
+    -fx-border-radius: 2px;
+    -fx-background-radius: 2px;
+    -fx-pref-width: 13px;
+    -fx-pref-height: 13px;
+}
+
+.show-password:hover .box {
+    -fx-border-color: #73C6C9;
+}
+
+.show-password:selected .box {
+    -fx-background-color: #A8DADC;
+    -fx-border-color: #73C6C9;
+}
+
+.show-password:selected .mark {
+    -fx-background-color: #FFFFFF;
+}
+
+.text-link {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 2px 0 2px 0;
+    -fx-text-fill: #67969D;
+    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-size: 11px;
+    -fx-font-weight: 400;
+    -fx-underline: false;
+    -fx-cursor: hand;
+}
+
+.text-link:hover,
+.text-link:focused {
+    -fx-text-fill: #3F7C84;
+    -fx-underline: true;
+}
+
+.text-link:pressed {
+    -fx-text-fill: #2F636A;
+}
+
+.login-button {
+    -fx-pref-width: 360px;
+    -fx-min-width: 360px;
+    -fx-max-width: 360px;
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-max-height: 40px;
+    -fx-background-color: #A8DADC;
+    -fx-background-radius: 5px;
+    -fx-border-color: #4EA9D0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-text-fill: #253238;
+    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: #82C4C7;
+    -fx-border-color: #3B98C3;
+}
+
+.login-button:focused {
+    -fx-effect: dropshadow(gaussian, rgba(78, 169, 208, 0.35), 7, 0.18, 0, 1);
+}
+
+.login-button:pressed {
+    -fx-background-color: #72B9BD;
+    -fx-scale-x: 0.96;
+    -fx-scale-y: 0.96;
+}
+
+.footer-label {
+    -fx-text-fill: #8A979C;
+    -fx-font-family: "Satoshi Variable Light";
+    -fx-font-size: 11px;
+    -fx-font-weight: 300;
+}
+
+.login-status {
+    -fx-text-fill: #923B3B;
+    -fx-font-size: 12px;
+    -fx-padding: 6px 0;
+}
+
+#visiblePasswordField {
+    -fx-padding: 0px 12px 0px 34px;
+}

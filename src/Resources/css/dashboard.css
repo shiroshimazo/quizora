@@ -1,0 +1,51 @@
+.dashboard-shell {
+    -fx-background-color: #F7FAFC;
+    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-size: 14px;
+    -fx-text-fill: #253238;
+}
+.sidebar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DCE5E8;
+    -fx-border-width: 0 1 0 0;
+    -fx-padding: 28 16 18 16;
+}
+.brand-block { -fx-padding: 0 12 30 12; }
+.brand-title {
+    -fx-font-family: "Satoshi Variable Bold";
+    -fx-font-size: 28px;
+    -fx-text-fill: #253238;
+}
+.role-label { -fx-font-size: 13px; -fx-text-fill: #68777D; }
+.navigation-caption {
+    -fx-font-family: "Satoshi Variable Medium";
+    -fx-font-size: 11px;
+    -fx-text-fill: #68777D;
+    -fx-padding: 0 12 12 12;
+}
+.navigation-button, .logout-button {
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-height: 44px;
+    -fx-padding: 10 12;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+    -fx-border-width: 2;
+    -fx-text-fill: #253238;
+    -fx-cursor: hand;
+}
+.navigation-button:hover, .logout-button:hover { -fx-background-color: #EDF4F8; }
+.navigation-button:selected {
+    -fx-background-color: #A8DADC;
+    -fx-font-family: "Satoshi Variable Medium";
+}
+.navigation-button:pressed, .logout-button:pressed { -fx-background-color: #82C4C7; }
+.navigation-button:focused, .logout-button:focused { -fx-border-color: #39777B; }
+.sidebar-footer {
+    -fx-border-color: #DCE5E8;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 14 0 0 0;
+}
+.workspace { -fx-background-color: #F7FAFC; }
+

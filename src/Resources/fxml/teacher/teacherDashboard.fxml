@@ -1,1 +1,32 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.dashboard.PanelController" prefWidth="1180" prefHeight="700"
+    styleClass="dashboard-shell" stylesheets="@../../css/dashboard.css">
+    <fx:define><ToggleGroup fx:id="navigationGroup"/></fx:define>
+    <left>
+        <VBox fx:id="sidebarPane" prefWidth="280" minWidth="280" maxWidth="280" styleClass="sidebar">
+            <VBox spacing="6" styleClass="brand-block">
+                <Label text="Quizora" styleClass="brand-title"/>
+                <Label text="Teacher panel" styleClass="role-label"/>
+            </VBox>
+            <Label text="WORKSPACE" styleClass="navigation-caption"/>
+            <VBox spacing="5">
+                <ToggleButton fx:id="dashboardButton" text="Dashboard" accessibleText="Dashboard" toggleGroup="$navigationGroup" selected="true" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="createQuizButton" text="Create Quiz" accessibleText="Create Quiz" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="assignedSubjectsButton" text="Assigned Subjects" accessibleText="Assigned Subjects" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="studentResultsButton" text="Student Results" accessibleText="Student Results" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="quizStatisticsButton" text="Quiz Statistics" accessibleText="Quiz Statistics" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="profileButton" text="Profile" accessibleText="Profile" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+            </VBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <VBox styleClass="sidebar-footer">
+                <Button fx:id="logoutButton" text="Logout" accessibleText="Log out and return to login" onAction="#logout" maxWidth="Infinity" styleClass="logout-button"/>
+            </VBox>
+        </VBox>
+    </left>
+    <center>
+        <StackPane fx:id="workspacePane" accessibleText="Dashboard workspace" styleClass="workspace"/>
+    </center>
+</BorderPane>

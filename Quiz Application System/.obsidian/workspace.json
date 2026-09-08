@@ -1,0 +1,226 @@
+{
+  "main": {
+    "id": "d0f6832d337de2a5",
+    "type": "split",
+    "children": [
+      {
+        "id": "31092bc8012e6d00",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2c65d079195bb255",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b15fae694d443119",
+    "type": "split",
+    "children": [
+      {
+        "id": "e62d96c772c53ec1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "41c9a4957dc01064",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "1390794bdfc5f6de",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "e50efdf5e17fc861",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "604ec4e07b9b0cf0",
+    "type": "split",
+    "children": [
+      {
+        "id": "64d04752c8821231",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "28e288d1102b8750",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "dd84cf2880057caf",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "646acfca0d378928",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "05460e52764650cb",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "5f5a072953e5c8e9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "2c65d079195bb255",
+  "lastOpenFiles": [
+    "System/Project Overview.md.md",
+    "System/System Architecture.md.md",
+    "Flowchart/Account Management.jpg",
+    "System UI/Authentication Rules.md.md",
+    "System UI/Database Rules.md.md",
+    "System UI/Sidebar Nav Ui.md.md",
+    "System UI/System UI Rules.md.md",
+    "System UI/Development Rules.md.md",
+    "Diagram/System Design.png",
+    "Diagram/System Design.png.~tmp",
+    "Diagram/ER Diagram.jpeg",
+    "Use Case Diagram.jpg",
+    "Unconfirmed 951881.crdownload",
+    "Diagram/Unconfirmed 838938.crdownload",
+    "Diagram/Unconfirmed 586815.crdownload",
+    "Diagram/Unconfirmed 85487.crdownload",
+    "Diagram/Unconfirmed 329238.crdownload",
+    "Diagram/Unconfirmed 755816.crdownload",
+    "Diagram/Unconfirmed 621771.crdownload",
+    "Diagram/Unconfirmed 279111.crdownload",
+    "Diagram/Unconfirmed 505865.crdownload",
+    "Flowchart/Quiz Statistics.jpg",
+    "Flowchart/Quiz Management.jpg",
+    "Flowchart/Teacher Profile.jpg",
+    "Flowchart/Teacher Management.jpg",
+    "Flowchart/Teacher Dashboard.jpg",
+    "Flowchart/SubjectCaterogy Management.jpg",
+    "System UI/Login Ui.md.md",
+    "System UI/Register Ui.md.md",
+    "Untitled.md",
+    "Untitled 1.canvas",
+    "Untitled.canvas",
+    "Features/Login.md.md",
+    "Login.md",
+    "System Architecture.md",
+    "System/Untitled.canvas",
+    "projectOverview.md.md",
+    "Welcome.md"
+  ]
+}
