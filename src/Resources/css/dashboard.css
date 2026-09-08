@@ -90,3 +90,43 @@
 .default-color0.chart-pie { -fx-pie-color: #BDE0FE; }
 .default-color1.chart-pie { -fx-pie-color: #82C4C7; }
 .default-color2.chart-pie { -fx-pie-color: #C8CEDB; }
+
+.management-input {
+    -fx-min-height: 42; -fx-background-color: white;
+    -fx-border-color: #DCE5E8; -fx-border-radius: 7; -fx-background-radius: 7;
+    -fx-padding: 8 12; -fx-text-fill: #253238;
+}
+.management-input:focused { -fx-border-color: #39777B; }
+.student-editor { -fx-padding: 20; }
+.student-edit-dialog { -fx-font-family: "Satoshi Variable Regular"; -fx-font-size: 14; }
+.management-error { -fx-text-fill: #923B3B; -fx-font-size: 13; }
+.student-table { -fx-background-color: white; -fx-border-color: #DCE5E8; -fx-padding: 0; }
+.student-table .column-header-background, .student-table .column-header,
+.student-table .filler { -fx-background-color: #EDF4F8; }
+.student-table .column-header { -fx-size: 44; -fx-border-color: transparent; }
+.student-table .column-header .label {
+    -fx-alignment: CENTER_LEFT; -fx-padding: 0 10;
+    -fx-font-family: "Satoshi Variable Medium"; -fx-text-fill: #253238;
+}
+.student-table .table-row-cell { -fx-cell-size: 60; -fx-background-color: white; }
+.student-table .table-row-cell:odd { -fx-background-color: #F7FAFC; }
+.student-table .table-row-cell:selected { -fx-background-color: #D8EEEE; }
+.student-table .table-row-cell:empty { -fx-background-color: white; }
+.student-table .table-row-cell:empty .table-cell { -fx-border-color: transparent; }
+.student-table .table-cell {
+    -fx-alignment: CENTER_LEFT; -fx-padding: 8 10; -fx-text-fill: #253238;
+    -fx-border-color: transparent transparent #EDF4F8 transparent;
+}
+.row-action {
+    -fx-min-height: 40; -fx-min-width: 58; -fx-padding: 8 10;
+    -fx-background-color: #EDF4F8; -fx-background-radius: 6; -fx-text-fill: #253238;
+    -fx-border-color: transparent; -fx-border-radius: 6; -fx-cursor: hand;
+}
+.row-action:hover { -fx-background-color: #BDE0FE; }
+.row-action:pressed { -fx-background-color: #82C4C7; }
+.row-action:focused { -fx-border-color: #39777B; }
+.archive-action:hover { -fx-background-color: #FAEDCD; }
+.status-badge { -fx-padding: 5 9; -fx-background-radius: 6; -fx-font-size: 12; }
+.status-active { -fx-background-color: #CDEDD6; -fx-text-fill: #285B3C; }
+.status-inactive { -fx-background-color: #FAEDCD; -fx-text-fill: #725923; }
+.status-archived { -fx-background-color: #EDF4F8; -fx-text-fill: #54656D; }

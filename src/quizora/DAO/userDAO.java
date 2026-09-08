@@ -11,7 +11,8 @@ public class userDAO {
     public Optional<LoginAccount> findForLogin(String identifier) throws SQLException {
         try (var connection = databaseConnection.getConnection();
              var statement = connection.prepareStatement(
-                     "SELECT user_id, full_name, role, password_hash, is_active FROM users "
+                     "SELECT user_id, full_name, role, password_hash, "
+                     + "(is_active AND archived_at IS NULL) AS is_active FROM users "
                      + "WHERE username = ? OR email = ? LIMIT 2")) {
             statement.setQueryTimeout(5);
             statement.setString(1, identifier);

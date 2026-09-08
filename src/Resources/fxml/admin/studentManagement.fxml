@@ -1,1 +1,70 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerAdmin.studentManagementController"
+    fx:id="studentScroll" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+    styleClass="overview-scroll" visible="false" managed="false">
+    <content>
+        <VBox spacing="22" minWidth="0" styleClass="admin-overview">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS">
+                    <Label text="ADMINISTRATION" styleClass="overview-eyebrow"/>
+                    <Label text="Student Management" wrapText="true" styleClass="overview-title"/>
+                    <Label text="Manage student accounts and access to assessments." wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <Button fx:id="refreshStudentsButton" text="Refresh" accessibleText="Refresh student records"
+                        onAction="#refresh" styleClass="refresh-button"/>
+            </HBox>
+            <GridPane fx:id="studentKpiGrid" hgap="18" vgap="18" minWidth="0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.334" minWidth="0"/>
+                </columnConstraints>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="0">
+                    <Label text="Total Student" styleClass="kpi-title"/>
+                    <Label fx:id="totalStudentValue" text="—" styleClass="kpi-value"/>
+                    <Label text="All student records, including archived" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="1">
+                    <Label text="Active Student" styleClass="kpi-title"/>
+                    <Label fx:id="activeStudentValue" text="—" styleClass="kpi-value"/>
+                    <Label text="Unarchived accounts with login enabled" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="2">
+                    <Label text="Inactive Student" styleClass="kpi-title"/>
+                    <Label fx:id="inactiveStudentValue" text="—" styleClass="kpi-value"/>
+                    <Label text="Unarchived accounts with login disabled" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+            </GridPane>
+            <VBox spacing="16" styleClass="chart-card" VBox.vgrow="ALWAYS" minWidth="0">
+                <Label text="Student directory" styleClass="chart-heading"/>
+                <FlowPane hgap="16" vgap="10">
+                    <VBox spacing="6">
+                        <Label text="Search students" labelFor="$studentSearch"/>
+                        <TextField fx:id="studentSearch" promptText="ID, name, username or email"
+                                   prefWidth="300" accessibleText="Search students by ID, name, username or email" styleClass="management-input"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Status" labelFor="$studentStatusFilter"/>
+                        <ComboBox fx:id="studentStatusFilter" prefWidth="180" accessibleText="Filter students by status" styleClass="management-input"/>
+                    </VBox>
+                </FlowPane>
+                <Label fx:id="studentMessage" text="Select Student Management to load records." wrapText="true" styleClass="overview-muted"/>
+                <TableView fx:id="studentTable" accessibleText="Student directory"
+                           minWidth="0" minHeight="300" prefHeight="440" VBox.vgrow="ALWAYS" styleClass="student-table">
+                    <columns>
+                        <TableColumn fx:id="idColumn" text="ID" minWidth="65" prefWidth="70"/>
+                        <TableColumn fx:id="nameColumn" text="Name" minWidth="150" prefWidth="180"/>
+                        <TableColumn fx:id="usernameColumn" text="Username" minWidth="130" prefWidth="150"/>
+                        <TableColumn fx:id="emailColumn" text="Email" minWidth="200" prefWidth="240"/>
+                        <TableColumn fx:id="statusColumn" text="Status" minWidth="100" prefWidth="110"/>
+                        <TableColumn fx:id="actionsColumn" text="Actions" minWidth="190" prefWidth="190" sortable="false"/>
+                    </columns>
+                </TableView>
+                <Label fx:id="studentResultCount" text="0 students shown" styleClass="overview-muted"/>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

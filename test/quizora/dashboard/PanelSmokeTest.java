@@ -41,7 +41,8 @@ public class PanelSmokeTest {
                         button.fire();
                         button.fire();
                         if (!button.isSelected()) throw new AssertionError("Selection lost");
-                        boolean expectsDashboard = i == 0 && "dashboardButton".equals(button.getId());
+                        boolean expectsDashboard = i == 0 && ("dashboardButton".equals(button.getId())
+                                || "studentManagementButton".equals(button.getId()));
                         boolean hasVisibleContent = workspace.getChildren().stream().anyMatch(javafx.scene.Node::isVisible);
                         if (hasVisibleContent != expectsDashboard) throw new AssertionError("Wrong workspace content");
                         if (button.getBoundsInParent().getMaxY() > 550)

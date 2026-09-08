@@ -22,7 +22,7 @@ public final class AdminDashboardDAO {
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             connection.setAutoCommit(false);
             try (var statement = connection.prepareStatement(
-                    "SELECT user_id FROM users WHERE user_id=? AND role='admin' AND is_active=TRUE")) {
+                    "SELECT user_id FROM users WHERE user_id=? AND role='admin' AND is_active=TRUE AND archived_at IS NULL")) {
                 statement.setQueryTimeout(10);
                 statement.setLong(1, user.id());
                 try (var result = statement.executeQuery()) {

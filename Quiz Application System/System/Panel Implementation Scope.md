@@ -22,7 +22,8 @@ Satoshi typography, and the documented brand palette.
 
 - Dashboard is selected initially; clicking a destination selects that item.
 - Admin Dashboard displays six KPI cards and three charts using MySQL data.
-- Other admin destinations and the teacher/student workspaces remain blank.
+- Student Management displays status KPIs, searchable/filterable records, Edit,
+  and confirmed Archive actions. Other admin destinations and teacher/student workspaces remain blank.
 - MySQL login validates credentials and active status, then routes by account role.
 - Logout clears the in-memory session and returns to the 1000 x 500 login screen.
 - Navigation controls provide hover, pressed, selected, and keyboard focus states.

@@ -14,6 +14,11 @@ It was imported into the local MySQL 8.4.3 server.
 
 ## Import on another machine
 
+For an existing Quizora database created before Student Management, run
+database/migrations/001_archive_users.sql before starting the updated app.
+It adds the retry-safe archived_at column; the main schema does not alter existing
+tables. The local database has already received this migration.
+
 Requires MySQL 8.0.16 or later for enforced CHECK constraints.
 Start MySQL, then open its command-line client:
 
@@ -66,7 +71,7 @@ databaseConnection.getConnection() opens a fresh JDBC connection and propagates
 SQLException to its caller. Use it in DAOs with try-with-resources and run database
 work off the JavaFX application thread. The existing panels remain presentation
 shells with a live administrator overview; login and role routing are implemented,
-while CRUD behavior is pending.
+and Student Management edits/archival are implemented; other CRUD behavior is pending.
 
 ## Login and local demo accounts
 
