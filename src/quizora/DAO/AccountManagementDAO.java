@@ -162,7 +162,7 @@ public class AccountManagementDAO {
         }
     }
 
-    private static void requireAdmin(Connection connection, AuthenticatedUser admin, boolean lock) throws SQLException {
+    static void requireAdmin(Connection connection, AuthenticatedUser admin, boolean lock) throws SQLException {
         if (admin == null || !"admin".equals(admin.role())) throw new SecurityException("Administrator access is required.");
         try (var statement = connection.prepareStatement("SELECT user_id FROM users "
                 + "WHERE user_id=? AND role='admin' AND is_active=TRUE AND archived_at IS NULL" + (lock ? " FOR SHARE" : ""))) {

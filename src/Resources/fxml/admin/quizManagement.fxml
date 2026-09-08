@@ -1,1 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerAdmin.quizManagementController"
+    fx:id="quizScroll" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+    styleClass="overview-scroll" visible="false" managed="false">
+    <content>
+        <VBox spacing="22" minWidth="0" styleClass="admin-overview">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS">
+                    <Label text="ADMINISTRATION" styleClass="overview-eyebrow"/>
+                    <Label text="Quiz Management" wrapText="true" styleClass="overview-title"/>
+                    <Label text="Create quizzes, manage questions and preserve assessment history." wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <Button fx:id="refreshQuizzesButton" text="Refresh" accessibleText="Refresh quiz records"
+                        onAction="#refresh" styleClass="refresh-button"/>
+            </HBox>
+            <GridPane fx:id="quizKpiGrid" hgap="18" vgap="18" minWidth="0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.334" minWidth="0"/>
+                </columnConstraints>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="0">
+                    <Label text="Total quizzes" styleClass="kpi-title"/>
+                    <Label fx:id="totalQuizValue" text="0" styleClass="kpi-value"/>
+                    <Label text="All quizzes, including archived" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="1">
+                    <Label text="Published quizzes" styleClass="kpi-title"/>
+                    <Label fx:id="publishedQuizValue" text="0" styleClass="kpi-value"/>
+                    <Label text="Quizzes available for assessment" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="2">
+                    <Label text="Draft quizzes" styleClass="kpi-title"/>
+                    <Label fx:id="draftQuizValue" text="0" styleClass="kpi-value"/>
+                    <Label text="Quizzes being prepared" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+            </GridPane>
+            <VBox spacing="16" styleClass="chart-card" VBox.vgrow="ALWAYS" minWidth="0">
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Label text="Quiz directory" styleClass="chart-heading" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button fx:id="addQuizButton" text="Add quiz" accessibleText="Add a new quiz"
+                            onAction="#addQuiz" styleClass="refresh-button"/>
+                </HBox>
+                <FlowPane hgap="16" vgap="10">
+                    <VBox spacing="6">
+                        <Label text="Search quizzes" labelFor="$quizSearch"/>
+                        <TextField fx:id="quizSearch" promptText="ID, title, subject or teacher"
+                                   prefWidth="300" accessibleText="Search quizzes by ID, title, subject or teacher" styleClass="management-input"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Status" labelFor="$quizStatusFilter"/>
+                        <ComboBox fx:id="quizStatusFilter" prefWidth="180" accessibleText="Filter quizzes by status" styleClass="management-input"/>
+                    </VBox>
+                </FlowPane>
+                <Label fx:id="quizMessage" text="Select Quiz Management to load records." wrapText="true" styleClass="overview-muted"/>
+                <TableView fx:id="quizTable" accessibleText="Quiz directory"
+                           minWidth="0" minHeight="300" prefHeight="440" VBox.vgrow="ALWAYS" styleClass="student-table">
 
+                </TableView>
+                <Label fx:id="quizResultCount" text="0 quizzes shown" styleClass="overview-muted"/>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

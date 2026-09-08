@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     description TEXT,
     time_limit_minutes INT UNSIGNED NOT NULL DEFAULT 30,
     status ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
+    archived_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CHECK (time_limit_minutes > 0),

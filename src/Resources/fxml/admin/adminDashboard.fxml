@@ -33,6 +33,7 @@
             <fx:include fx:id="dashboardContent" source="overview.fxml"/>
             <fx:include fx:id="studentContent" source="studentManagement.fxml"/>
             <fx:include fx:id="teacherContent" source="teacherManagement.fxml"/>
+            <fx:include fx:id="quizContent" source="quizManagement.fxml"/>
         </StackPane>
     </center>
 </BorderPane>

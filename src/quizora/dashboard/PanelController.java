@@ -26,6 +26,8 @@ public class PanelController implements Initializable {
     @FXML private quizora.controllerAdmin.studentManagementController studentContentController;
     @FXML private javafx.scene.Node teacherContent;
     @FXML private quizora.controllerAdmin.teacherManagementController teacherContentController;
+    @FXML private javafx.scene.Node quizContent;
+    @FXML private quizora.controllerAdmin.quizManagementController quizContentController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -51,6 +53,12 @@ public class PanelController implements Initializable {
             studentContent.setVisible(students);
             studentContent.setManaged(students);
             if (students) studentContentController.refresh();
+        }
+        if (quizContent != null) {
+            boolean quizzes = "quizManagementButton".equals(destination.getId());
+            quizContent.setVisible(quizzes);
+            quizContent.setManaged(quizzes);
+            if (quizzes) quizContentController.refresh();
         }
         if (teacherContent != null) {
             boolean teachers = "teacherManagementButton".equals(destination.getId());
