@@ -35,7 +35,7 @@ public class studentManagementController implements Initializable {
     @FXML private Label studentMessage, studentResultCount;
     @FXML private TextField studentSearch;
     @FXML private ComboBox<String> studentStatusFilter;
-    @FXML private Button refreshStudentsButton;
+    @FXML private Button refreshStudentsButton, addStudentButton;
     @FXML private TableView<StudentRecord> studentTable;
     @FXML private TableColumn<StudentRecord, Long> idColumn;
     @FXML private TableColumn<StudentRecord, String> nameColumn, usernameColumn, emailColumn, statusColumn;
@@ -191,39 +191,70 @@ public class studentManagementController implements Initializable {
         studentSearch.setDisable(value);
         studentStatusFilter.setDisable(value);
         refreshStudentsButton.setDisable(value);
+        addStudentButton.setDisable(value);
+    }
+
+    @FXML private void addStudent() {
+        if (busy) return;
+        var identity = UserSession.current();
+        if (identity == null || !"admin".equals(identity.role())) {
+            studentMessage.setText("Sign in as an administrator to manage students.");
+            return;
+        }
+        openStudentForm(null);
     }
 
     private void editStudent(StudentRecord student) {
         if (busy || student == null || student.archived()) return;
+        openStudentForm(student);
+    }
+
+    private void openStudentForm(StudentRecord student) {
+        boolean creating = student == null;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Resources/fxml/admin/studentEdit.fxml"));
             Parent form = loader.load();
             StudentEditController editor = loader.getController();
-            editor.populate(student);
+            if (creating) editor.prepareCreate();
+            else editor.populate(student);
             Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Edit student · ID " + student.id());
+            dialog.setTitle(creating ? "Add student" : "Edit student · ID " + student.id());
             dialog.initOwner(studentTable.getScene().getWindow());
             dialog.getDialogPane().setContent(form);
             dialog.getDialogPane().getStyleClass().add("student-edit-dialog");
             dialog.getDialogPane().getStylesheets().add(getClass().getResource("/Resources/css/dashboard.css").toExternalForm());
-            ButtonType saveType = new ButtonType("Save changes", ButtonBar.ButtonData.OK_DONE);
+            ButtonType saveType = new ButtonType(creating ? "Add student" : "Save changes", ButtonBar.ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().setAll(saveType, ButtonType.CANCEL);
             Button save = (Button) dialog.getDialogPane().lookupButton(saveType);
             Button cancel = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
-            save.setId("saveStudentButton"); save.setAccessibleText("Save student changes");
+            save.setId("saveStudentButton"); save.setAccessibleText(creating ? "Save new student" : "Save student changes");
             cancel.setId("cancelStudentEditButton"); cancel.setAccessibleText("Cancel student editing");
             dialog.setOnCloseRequest(event -> { if (busy) event.consume(); });
             save.addEventFilter(ActionEvent.ACTION, event -> {
                 event.consume();
                 if (busy) return;
                 StudentChanges changes;
-                try { changes = editor.changes(); }
+                String password;
+                try {
+                    changes = editor.changes();
+                    password = creating ? editor.password() : null;
+                }
                 catch (IllegalArgumentException invalid) { editor.message(invalid.getMessage()); return; }
                 var identity = UserSession.current();
                 form.setDisable(true); save.setDisable(true); cancel.setDisable(true);
                 editor.message("Saving changes...");
-                execute(() -> dao.edit(identity, student, changes), updated -> {
-                    replace(updated, "Student details saved.");
+                execute(() -> creating ? dao.create(identity, changes, password) : dao.edit(identity, student, changes), updated -> {
+                    if (creating) {
+                        loaded = true;
+                        records.add(0, updated);
+                        studentSearch.clear();
+                        studentStatusFilter.setValue("All statuses");
+                        updateTotals();
+                        filter();
+                        studentTable.getSelectionModel().select(updated);
+                        studentTable.scrollTo(updated);
+                        studentMessage.setText("Student added successfully.");
+                    } else replace(updated, "Student details saved.");
                     dialog.close();
                 }, error -> {
                     form.setDisable(false); save.setDisable(false); cancel.setDisable(false);
@@ -231,8 +262,9 @@ public class studentManagementController implements Initializable {
                 });
             });
             dialog.showAndWait();
+            editor.clearPassword();
         } catch (IOException error) {
-            studentMessage.setText("Unable to open the edit form.");
+            studentMessage.setText("Unable to open the student form.");
         }
     }
 

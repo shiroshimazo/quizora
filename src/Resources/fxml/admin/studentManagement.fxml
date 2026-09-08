@@ -39,7 +39,11 @@
                 </VBox>
             </GridPane>
             <VBox spacing="16" styleClass="chart-card" VBox.vgrow="ALWAYS" minWidth="0">
-                <Label text="Student directory" styleClass="chart-heading"/>
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Label text="Student directory" styleClass="chart-heading" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button fx:id="addStudentButton" text="Add student" accessibleText="Add a new student"
+                            onAction="#addStudent" styleClass="refresh-button"/>
+                </HBox>
                 <FlowPane hgap="16" vgap="10">
                     <VBox spacing="6">
                         <Label text="Search students" labelFor="$studentSearch"/>

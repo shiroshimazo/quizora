@@ -12,13 +12,24 @@ public class StudentManagementTest {
         var auth = new AuthenticationService();
         var admin = auth.authenticate("admin", "Admin@123".toCharArray()).orElseThrow();
         var dao = new StudentManagementDAO();
-        String tag = UUID.randomUUID().toString();
+        String tag = UUID.randomUUID().toString().substring(0, 20);
         long studentId=0, subjectId=0, quizId=0, attemptId=0;
         try (var connection = databaseConnection.getConnection()) {
             try {
-                studentId=insert(connection, "INSERT INTO users(full_name,username,email,password_hash,role) "
-                        + "VALUES('Test Student',?,?,?,'student')", tag,tag+"@example.invalid",
-                        PasswordHasher.hash("Test@123".toCharArray()));
+                var details = new StudentChanges("Test Student",tag,tag+"@example.invalid",true);
+                try { dao.create(null,details,"Test@123"); throw new AssertionError("Anonymous create allowed"); }
+                catch(SecurityException expected) { }
+                try { dao.create(admin,details,"short"); throw new AssertionError("Short password accepted"); }
+                catch(IllegalArgumentException expected) { }
+                StudentRecord created=dao.create(admin,details,"Test@123");
+                studentId=created.id();
+                require(created.active() && !created.archived(),"New student active and unarchived");
+                require(auth.authenticate(tag,"Test@123".toCharArray()).orElseThrow().role().equals("student"),"Created student can log in");
+                try { dao.create(admin,details,"Test@123"); throw new AssertionError("Duplicate create allowed"); }
+                catch(SQLException expected) { require(expected.getErrorCode()==1062,"Duplicate create validation"); }
+                try { dao.create(admin,new StudentChanges("Collision",details.email(),tag+"-other@example.invalid",true),"Test@123");
+                    throw new AssertionError("Cross-field duplicate allowed"); }
+                catch(SQLException expected) { require(expected.getErrorCode()==1062,"Cross-field duplicate validation"); }
                 subjectId=insert(connection,"INSERT INTO subjects(subject_name) VALUES(?)",tag);
                 long teacherId;
                 try (var s=connection.prepareStatement("SELECT user_id FROM users WHERE role='teacher' LIMIT 1");

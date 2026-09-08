@@ -15,6 +15,58 @@ public final class StudentManagementDAO {
     private static final String PROJECTION =
             "SELECT user_id,full_name,username,email,is_active,archived_at FROM users ";
 
+    public StudentRecord create(AuthenticatedUser admin, StudentChanges details, String password) throws SQLException {
+        if (details == null) throw new IllegalArgumentException("Student details are required.");
+        validatePassword(password);
+        try (var connection = databaseConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                requireAdmin(connection, admin, true);
+                try (var duplicate = connection.prepareStatement(
+                        "SELECT user_id FROM users WHERE username IN (?,?) OR email IN (?,?) FOR UPDATE")) {
+                    duplicate.setQueryTimeout(10);
+                    duplicate.setString(1, details.username());
+                    duplicate.setString(2, details.email());
+                    duplicate.setString(3, details.username());
+                    duplicate.setString(4, details.email());
+                    try (var result = duplicate.executeQuery()) {
+                        if (result.next()) throw new SQLException("Username or email is already in use.", "23000", 1062);
+                    }
+                }
+                char[] secret = password.toCharArray();
+                String hash;
+                try { hash = quizora.auth.PasswordHasher.hash(secret); }
+                finally { java.util.Arrays.fill(secret, '\0'); }
+                StudentRecord created;
+                try (var statement = connection.prepareStatement(
+                        "INSERT INTO users(full_name,username,email,password_hash,role,is_active) VALUES(?,?,?,?,'student',?)",
+                        java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setQueryTimeout(10);
+                    statement.setString(1, details.name());
+                    statement.setString(2, details.username());
+                    statement.setString(3, details.email());
+                    statement.setString(4, hash);
+                    statement.setBoolean(5, details.active());
+                    statement.executeUpdate();
+                    try (var keys = statement.getGeneratedKeys()) {
+                        if (!keys.next()) throw new SQLException("Student ID was not returned.");
+                        created = findLocked(connection, keys.getLong(1));
+                    }
+                }
+                connection.commit();
+                return created;
+            } catch (SQLException | RuntimeException error) {
+                connection.rollback();
+                throw error;
+            }
+        }
+    }
+
+    public static void validatePassword(String password) {
+        if (password == null || password.isBlank() || password.length() < 8 || password.length() > 128)
+            throw new IllegalArgumentException("Password must contain 8 to 128 characters.");
+    }
+
     public List<StudentRecord> load(AuthenticatedUser admin) throws SQLException {
         try (var connection = databaseConnection.getConnection()) {
             connection.setReadOnly(true);

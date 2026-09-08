@@ -4,13 +4,19 @@
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="quizora.controllerAdmin.StudentEditController" spacing="10"
       prefWidth="420" styleClass="student-editor">
-    <Label text="Update student details" styleClass="chart-heading"/>
+    <Label fx:id="formHeading" text="Update student details" styleClass="chart-heading"/>
     <Label text="Name *" labelFor="$nameField"/>
     <TextField fx:id="nameField" accessibleText="Student full name" styleClass="management-input"/>
     <Label text="Username *" labelFor="$usernameField"/>
     <TextField fx:id="usernameField" accessibleText="Student username" styleClass="management-input"/>
     <Label text="Email *" labelFor="$emailField"/>
     <TextField fx:id="emailField" accessibleText="Student email" styleClass="management-input"/>
+    <VBox fx:id="passwordFields" spacing="10" visible="false" managed="false">
+        <Label text="Password *" labelFor="$passwordField"/>
+        <PasswordField fx:id="passwordField" promptText="8 to 128 characters" accessibleText="Student password" styleClass="management-input"/>
+        <Label text="Confirm password *" labelFor="$confirmPasswordField"/>
+        <PasswordField fx:id="confirmPasswordField" accessibleText="Confirm student password" styleClass="management-input"/>
+    </VBox>
     <Label text="Status *" labelFor="$editStatusFilter"/>
     <ComboBox fx:id="editStatusFilter" accessibleText="Student account status" maxWidth="Infinity" styleClass="management-input"/>
     <Label fx:id="editMessage" text="" wrapText="true" minHeight="42" maxWidth="420" styleClass="management-error"/>

@@ -54,6 +54,36 @@ public class StudentManagementViewTest {
                 ((ToggleButton)stage.getScene().lookup("#studentManagementButton")).fire();return null;
             });
             await(()->((Label)stage.getScene().lookup("#studentMessage")).getText().equals("Student records are up to date."));
+            Platform.runLater(()->((Button)stage.getScene().lookup("#addStudentButton")).fire());
+            await(()->dialog("Add student")!=null);
+            fx(()->{
+                var scene=dialog("Add student").getScene();
+                ((Button)scene.lookup("#saveStudentButton")).fire();
+                require(!((Label)scene.lookup("#editMessage")).getText().isBlank(),"Required add fields validated");
+                ((TextField)scene.lookup("#nameField")).setText("Added UI Student");
+                ((TextField)scene.lookup("#usernameField")).setText("new-"+tag.substring(3));
+                ((TextField)scene.lookup("#emailField")).setText("new-"+tag.substring(3)+"@example.invalid");
+                ((PasswordField)scene.lookup("#passwordField")).setText("Test@123");
+                ((PasswordField)scene.lookup("#confirmPasswordField")).setText("different");
+                ((Button)scene.lookup("#saveStudentButton")).fire();
+                require(((Label)scene.lookup("#editMessage")).getText().equals("Passwords do not match."),"Password confirmation validated");
+                ((PasswordField)scene.lookup("#confirmPasswordField")).setText("Test@123");
+                ((Button)scene.lookup("#saveStudentButton")).fire();return null;
+            });
+            await(()->dialog("Add student")==null);
+            fx(()->{
+                var table=(TableView<StudentRecord>)stage.getScene().lookup("#studentTable");
+                require(table.getItems().stream().anyMatch(s->s.username().equals("new-"+tag.substring(3))),"Created student displayed");
+                require(((Label)stage.getScene().lookup("#studentMessage")).getText().equals("Student added successfully."),"Creation success message");
+                return null;
+            });
+            Platform.runLater(()->((Button)stage.getScene().lookup("#addStudentButton")).fire());
+            await(()->dialog("Add student")!=null);
+            fx(()->{
+                require(((PasswordField)dialog("Add student").getScene().lookup("#passwordField")).getText().isEmpty(),"New form clears password");
+                ((Button)dialog("Add student").getScene().lookup("#cancelStudentEditButton")).fire();return null;
+            });
+            await(()->dialog("Add student")==null);
             String total=fx(()->((Label)stage.getScene().lookup("#totalStudentValue")).getText());
             fx(()->{
                 ((TextField)stage.getScene().lookup("#studentSearch")).setText(tag);
@@ -141,6 +171,9 @@ public class StudentManagementViewTest {
         }finally{
             fx(()->{if(stage!=null)stage.close();UserSession.clear();return null;});
             Platform.exit();
+            try(var c=databaseConnection.getConnection();var s=c.prepareStatement("DELETE FROM users WHERE username=? AND email=?")){
+                s.setString(1,"new-"+tag.substring(3));s.setString(2,"new-"+tag.substring(3)+"@example.invalid");s.executeUpdate();
+            }
             try(var c=databaseConnection.getConnection();var s=c.prepareStatement("DELETE FROM users WHERE user_id=? AND username=?")){
                 s.setLong(1,fixture);s.setString(2,tag);s.executeUpdate();
             }
