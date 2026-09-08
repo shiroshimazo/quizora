@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerAdmin.adminDashboardController"
+    fx:id="overviewScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="overview-scroll">
+    <content>
+        <VBox spacing="24" styleClass="admin-overview" minWidth="0">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox spacing="6" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="ADMINISTRATION" styleClass="overview-eyebrow"/>
+                    <Label text="System overview" styleClass="overview-title" wrapText="true"/>
+                    <Label text="Monitor your learning community, assessment activity, and quiz readiness." styleClass="overview-muted" wrapText="true"/>
+                </VBox>
+                <Button fx:id="refreshButton" text="Refresh data" accessibleText="Refresh administrator dashboard" onAction="#refresh" styleClass="refresh-button"/>
+            </HBox>
+            <Label fx:id="statusLabel" text="Loading system overview..." wrapText="true" styleClass="overview-muted"/>
+            <GridPane fx:id="kpiGrid" hgap="18" vgap="18" minWidth="0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.333" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="33.333" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="33.334" hgrow="ALWAYS"/>
+                </columnConstraints>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="Students" styleClass="kpi-title"/>
+                    <Label fx:id="studentsValue" text="—" styleClass="kpi-value"/>
+                    <Label text="All student accounts" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="Teachers" styleClass="kpi-title"/>
+                    <Label fx:id="teachersValue" text="—" styleClass="kpi-value"/>
+                    <Label text="All teacher accounts" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <Label text="Quizzes" styleClass="kpi-title"/>
+                    <Label fx:id="quizzesValue" text="—" styleClass="kpi-value"/>
+                    <Label text="All publication states" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label text="Subjects" styleClass="kpi-title"/>
+                    <Label fx:id="subjectsValue" text="—" styleClass="kpi-value"/>
+                    <Label text="Across the curriculum" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label text="Submitted attempts" styleClass="kpi-title"/>
+                    <Label fx:id="submissionsValue" text="—" styleClass="kpi-value"/>
+                    <Label text="All time · includes retakes" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <Label text="Average score" styleClass="kpi-title"/>
+                    <Label fx:id="averageValue" text="—" styleClass="kpi-value"/>
+                    <Label text="Mean of finalized attempt percentages" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+            </GridPane>
+            <VBox spacing="12" styleClass="chart-card">
+                <Label text="Assessment activity" styleClass="chart-heading"/>
+                <Label fx:id="periodLabel" text="Submitted attempts · Last 14 days" styleClass="overview-muted"/>
+                <StackPane>
+                    <LineChart fx:id="submissionChart" animated="false" legendVisible="false"
+                               accessibleText="Daily submitted quiz attempts for the last fourteen days"
+                               prefHeight="350" minHeight="350" minWidth="0" createSymbols="true">
+                        <xAxis><CategoryAxis label="Submission date"/></xAxis>
+                        <yAxis><NumberAxis label="Submitted attempts" forceZeroInRange="true"/></yAxis>
+                    </LineChart>
+                    <Label fx:id="lineEmptyLabel" text="Waiting for data" styleClass="chart-empty" mouseTransparent="true"/>
+                </StackPane>
+            </VBox>
+            <GridPane fx:id="chartGrid" hgap="24" vgap="24" minWidth="0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="60" hgrow="ALWAYS" minWidth="0"/>
+                    <ColumnConstraints percentWidth="40" hgrow="ALWAYS" minWidth="0"/>
+                </columnConstraints>
+                <VBox spacing="12" styleClass="chart-card" GridPane.columnIndex="0" minWidth="0">
+                    <Label text="Quizzes by subject" styleClass="chart-heading"/>
+                    <Label text="Top 8 subjects by quiz count · All publication states" wrapText="true" styleClass="overview-muted"/>
+                    <StackPane>
+                        <BarChart fx:id="subjectChart" animated="false" legendVisible="false"
+                                  accessibleText="Quiz counts for the top eight subjects"
+                                  prefHeight="400" minHeight="400" minWidth="0">
+                            <xAxis><CategoryAxis label="Subject" tickLabelRotation="-20"/></xAxis>
+                            <yAxis><NumberAxis label="Quizzes" forceZeroInRange="true"/></yAxis>
+                        </BarChart>
+                        <Label fx:id="barEmptyLabel" text="Waiting for data" styleClass="chart-empty" mouseTransparent="true"/>
+                    </StackPane>
+                </VBox>
+                <VBox spacing="12" styleClass="chart-card" GridPane.columnIndex="1" minWidth="0">
+                    <Label text="Quiz readiness" styleClass="chart-heading"/>
+                    <Label text="Share of all quizzes by publication status" wrapText="true" styleClass="overview-muted"/>
+                    <StackPane>
+                        <PieChart fx:id="statusChart" animated="false" labelsVisible="false" legendVisible="true"
+                                  accessibleText="Quizzes split into draft, published and closed status"
+                                  prefHeight="400" minHeight="400" minWidth="0"/>
+                        <Label fx:id="pieEmptyLabel" text="Waiting for data" styleClass="chart-empty" mouseTransparent="true"/>
+                    </StackPane>
+                </VBox>
+            </GridPane>
+            <Label text="Counts include active and inactive accounts. Scores include finalized results from submitted attempts only."
+                   wrapText="true" styleClass="overview-muted"/>
+        </VBox>
+    </content>
+</ScrollPane>

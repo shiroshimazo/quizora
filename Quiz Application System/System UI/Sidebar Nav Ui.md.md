@@ -20,7 +20,7 @@ The system consists of three user panels:
 - Logout
 
 ### Panel Size:
-- **1180x700 pixels**
+- **Resizable; opens up to 1440x900 pixels within the screen work area**
 
 ---
 
@@ -36,7 +36,7 @@ The system consists of three user panels:
 - Logout
 
 ### Panel Size:
-- **1180x700 pixels**
+- **Resizable; opens up to 1440x900 pixels within the screen work area**
 
 ---
 
@@ -51,4 +51,4 @@ The system consists of three user panels:
 - Logout
 
 ### Panel Size:
-- **1180x700 pixels**
+- **Resizable; opens up to 1440x900 pixels within the screen work area**

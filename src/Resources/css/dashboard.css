@@ -49,3 +49,44 @@
 }
 .workspace { -fx-background-color: #F7FAFC; }
 
+.overview-scroll, .overview-scroll > .viewport { -fx-background-color: #F7FAFC; }
+.overview-scroll { -fx-background-insets: 0; -fx-padding: 0; }
+.admin-overview { -fx-padding: 36; }
+.overview-eyebrow {
+    -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 12; -fx-text-fill: #39777B;
+}
+.overview-title {
+    -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 34; -fx-text-fill: #253238;
+}
+.overview-muted { -fx-font-size: 13; -fx-text-fill: #68777D; }
+.kpi-card, .chart-card {
+    -fx-background-color: white; -fx-background-radius: 14;
+    -fx-border-color: #DCE5E8; -fx-border-radius: 14;
+    -fx-padding: 24;
+}
+.kpi-title { -fx-font-family: "Satoshi Variable Medium"; -fx-text-fill: #68777D; -fx-font-size: 15; }
+.kpi-value { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 40; -fx-text-fill: #253238; }
+.chart-heading { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 20; -fx-text-fill: #253238; }
+.refresh-button {
+    -fx-background-color: #A8DADC; -fx-background-radius: 8; -fx-padding: 12 20;
+    -fx-text-fill: #253238; -fx-font-family: "Satoshi Variable Medium"; -fx-min-height: 44;
+    -fx-border-color: transparent; -fx-border-width: 2; -fx-border-radius: 8; -fx-cursor: hand;
+}
+.refresh-button:hover { -fx-background-color: #82C4C7; }
+.refresh-button:pressed { -fx-background-color: #72B9BD; }
+.refresh-button:focused { -fx-border-color: #39777B; }
+.chart-empty {
+    -fx-background-color: #EDF4F8; -fx-background-radius: 8; -fx-padding: 12 20; -fx-text-fill: #68777D;
+}
+.chart-plot-background { -fx-background-color: transparent; }
+.chart-vertical-grid-lines { -fx-stroke: transparent; }
+.chart-horizontal-grid-lines { -fx-stroke: #EDF4F8; }
+.chart-legend { -fx-background-color: transparent; -fx-padding: 12; }
+.axis { -fx-tick-label-fill: #68777D; -fx-tick-label-font-size: 12; }
+.axis-label { -fx-text-fill: #68777D; }
+.default-color0.chart-bar { -fx-bar-fill: #82C4C7; }
+.default-color0.chart-series-line { -fx-stroke: #39777B; -fx-stroke-width: 3; }
+.default-color0.chart-line-symbol { -fx-background-color: #39777B, white; -fx-background-radius: 5; }
+.default-color0.chart-pie { -fx-pie-color: #BDE0FE; }
+.default-color1.chart-pie { -fx-pie-color: #82C4C7; }
+.default-color2.chart-pie { -fx-pie-color: #C8CEDB; }

@@ -8,7 +8,7 @@ The desktop interface is implemented with JavaFX. FXML is used for declarative l
 
 ### General Rules:
 - All authentication interfaces must use a fixed resolution of **1000x500 pixels**.
-- All user dashboard panels must use a fixed resolution of **1180x700 pixels**.
+- All user dashboard panels are **resizable**, opening at up to **1440x900 pixels**, capped at 92% of the current screen work area. Dashboard content must reflow and scroll as needed.
 - The interface must maintain consistent spacing, alignment, colors, and button styles.
 - Navigation elements must be easy to understand and accessible.
 - The design must support clear separation between different user roles.

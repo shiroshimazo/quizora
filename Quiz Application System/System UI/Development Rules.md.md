@@ -63,7 +63,7 @@ Avoid generated names such as `button1`, `textField1`, or `pane1`.
 
 # UI Component Placement Rules
 
-Every control must remain inside its designated layout container. Authentication screens use the fixed 1000×500 split layout: branding on the left and the form on the right. Dashboard screens use the fixed 1180×700 shell with sidebar navigation and a role-specific workspace.
+Every control must remain inside its designated layout container. Authentication screens use the fixed 1000×500 split layout: branding on the left and the form on the right. Dashboard screens use a resizable shell that initially fits the current screen, with sidebar navigation and a role-specific workspace. Reflow dashboard cards/charts on width changes and allow vertical scrolling.
 
 For each screen:
 

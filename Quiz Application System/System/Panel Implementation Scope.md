@@ -8,8 +8,8 @@ Teachers prepare quizzes and monitor student performance. Students take quizzes
 and review their own results. The architecture separates presentation, application
 logic, and database access.
 
-This delivery implements presentation shells and MySQL login for those roles.
-Each panel uses the documented fixed 1180 x 700 size, a role-specific sidebar,
+This delivery implements role panels, MySQL login, and the live admin overview.
+Each panel uses a resizable window that initially fits the screen, a role-specific sidebar,
 Satoshi typography, and the documented brand palette.
 
 | Role | Sidebar destinations, followed by Logout |
@@ -21,7 +21,8 @@ Satoshi typography, and the documented brand palette.
 ## Delivered behavior
 
 - Dashboard is selected initially; clicking a destination selects that item.
-- Every destination leaves the main workspace completely blank.
+- Admin Dashboard displays six KPI cards and three charts using MySQL data.
+- Other admin destinations and the teacher/student workspaces remain blank.
 - MySQL login validates credentials and active status, then routes by account role.
 - Logout clears the in-memory session and returns to the 1000 x 500 login screen.
 - Navigation controls provide hover, pressed, selected, and keyboard focus states.
@@ -31,11 +32,12 @@ The existing studentDashbaord.fxml filename is retained for compatibility.
 
 ## Deferred functionality
 
-Feature-level authorization, CRUD forms, quiz attempts, grading, reports, profile
+The admin overview verifies active administrator access. Other feature authorization,
+CRUD forms, quiz attempts, grading, reports, profile
 editing, registration, and password reset remain future work.
 The preview launcher is a development tool and does not authenticate users.
 The normal login route uses a verified session from the application layer.
-The preview launcher only displays blank layouts and does not grant a session.
+The preview launcher displays layouts without fetching admin data or granting a session.
 Existing database structures are unchanged.
 
 ## Preview
@@ -54,5 +56,9 @@ ant -Dmain.class=quizora.dashboard.PanelPreview -Dapplication.args=teacher run
 
 The Ant jar build passed. PanelSmokeTest loaded and laid out all three FXML views,
 checked all 19 navigation destinations (including repeated selection), verified
-empty workspaces, and exercised logout for each role. The JavaFX runtime reported
-no FXML or CSS errors. Manual visual and keyboard traversal checks remain pending.
+admin overview visibility and blank feature pages, and exercised logout for each role.
+AdminDashboardDataTest checks aggregates with rolled-back fixtures.
+AdminDashboardViewTest checks empty/populated states and produces a visual fixture
+snapshot. LoginSmokeTest verifies live admin loading and all three resizable
+role routes, initial screen fit, and login sizing reset. Responsive view tests verify
+card/chart reflow. The final runs reported no FXML or CSS errors.

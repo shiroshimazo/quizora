@@ -84,7 +84,9 @@ public final class LoginSmokeTest {
                     return null;
                 });
                 long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
-                while (!fx(() -> stage.getScene().lookup("#workspacePane") != null)) {
+                while (!fx(() -> stage.getScene().lookup("#workspacePane") != null
+                        && (!account[0].equals("admin") || ((Label) stage.getScene().lookup("#statusLabel"))
+                                .getText().startsWith("Updated ")))) {
                     if (System.nanoTime() > deadline) {
                         throw new AssertionError("Login timed out: " + fx(() ->
                                 ((Label) stage.getScene().lookup("#loginStatusLabel")).getText()));
@@ -96,21 +98,37 @@ public final class LoginSmokeTest {
                     var scene = stage.getScene();
                     require(scene.getRoot().lookupAll(".navigation-button").size()
                             == Integer.parseInt(account[2]), "Role-specific menu");
-                    require(((StackPane) scene.lookup("#workspacePane")).getChildren().isEmpty(),
-                            "Workspace remains blank");
-                    require(scene.getWidth() == 1180 && scene.getHeight() == 700, "Panel dimensions");
+                    require(((StackPane) scene.lookup("#workspacePane")).getChildren().isEmpty()
+                            != account[0].equals("admin"), "Only admin has dashboard content");
+                    require(stage.isResizable(), "Role panels must be resizable");
+                    var screen = javafx.stage.Screen.getScreensForRectangle(stage.getX(), stage.getY(),
+                            stage.getWidth(), stage.getHeight()).getFirst().getVisualBounds();
+                    require(stage.getX() >= screen.getMinX() && stage.getY() >= screen.getMinY()
+                            && stage.getX()+stage.getWidth() <= screen.getMaxX()+1
+                            && stage.getY()+stage.getHeight() <= screen.getMaxY()+1, "Panel fits screen");
+                    quizora.dashboard.PanelController.confirmOverride = () -> false;
+                    ((Button) scene.lookup("#logoutButton")).fire();
+                    require(UserSession.current() != null, "Cancelled logout keeps session");
+                    require(stage.getScene().lookup("#workspacePane") != null,
+                            "Cancelled logout stays on panel");
+                    quizora.dashboard.PanelController.confirmOverride = () -> true;
                     ((Button) scene.lookup("#logoutButton")).fire();
                     require(UserSession.current() == null, "Logout clears session");
                     require(stage.getScene().lookup("#usernameField") != null, "Logout returns to login");
+                    require(!stage.isResizable() && stage.getMinWidth() == 0 && stage.getMinHeight() == 0,
+                            "Logout restores login sizing");
                     require(((PasswordField) stage.getScene().lookup("#passwordField")).getText().isEmpty(),
                             "Logout clears password");
                     return null;
                 });
             }
             System.out.println("PASS: hashes, invalid/inactive/injection rejection, username/email login, "
-                    + "all three real UI routes, busy/show-password states, blank panels and logout.");
+                    + "all three real UI routes, live admin dashboard, blank teacher/student panels and logout.");
         } finally {
-            fx(() -> { if (stage != null) stage.close(); return null; });
+            try {
+                fx(() -> { quizora.dashboard.PanelController.confirmOverride = null;
+                    if (stage != null) stage.close(); return null; });
+            } catch (Exception ignored) { }
             Platform.exit();
         }
     }

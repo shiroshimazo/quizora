@@ -27,7 +27,10 @@ public class PanelSmokeTest {
                     Parent root = FXMLLoader.load(PanelSmokeTest.class.getResource(
                             "/Resources/fxml/" + views[i] + ".fxml"));
                     Stage stage = new Stage();
-                    stage.setScene(new Scene(root, 1180, 700));
+                    PanelWindow.show(stage, root, "Panel sizing test");
+                    if (!stage.isResizable()) throw new AssertionError("Panel cannot resize");
+                    stage.setWidth(1000);
+                    stage.setHeight(700);
                     root.applyCss();
                     root.layout();
                     StackPane workspace = (StackPane) root.lookup("#workspacePane");
@@ -38,19 +41,27 @@ public class PanelSmokeTest {
                         button.fire();
                         button.fire();
                         if (!button.isSelected()) throw new AssertionError("Selection lost");
-                        if (!workspace.getChildren().isEmpty()) throw new AssertionError("Not blank");
+                        boolean expectsDashboard = i == 0 && "dashboardButton".equals(button.getId());
+                        boolean hasVisibleContent = workspace.getChildren().stream().anyMatch(javafx.scene.Node::isVisible);
+                        if (hasVisibleContent != expectsDashboard) throw new AssertionError("Wrong workspace content");
                         if (button.getBoundsInParent().getMaxY() > 550)
                             throw new AssertionError("Menu overflow");
                     }
+                    PanelController.confirmOverride = () -> false;
+                    ((Button) root.lookup("#logoutButton")).fire();
+                    if (stage.getScene().lookup("#workspacePane") == null)
+                        throw new AssertionError("Cancelled logout must stay on panel");
+                    PanelController.confirmOverride = () -> true;
                     ((Button) root.lookup("#logoutButton")).fire();
                     if (stage.getScene().lookup("#usernameField") == null)
                         throw new AssertionError("Logout did not open login");
                     stage.close();
                 }
-                System.out.println("PASS: three role layouts, 19 navigation destinations, blank workspaces, logout.");
+                System.out.println("PASS: three role layouts, 19 destinations, admin overview visibility, blank feature pages, logout.");
             } catch (Throwable error) {
                 failure.set(error);
             } finally {
+                PanelController.confirmOverride = null;
                 done.countDown();
             }
         });

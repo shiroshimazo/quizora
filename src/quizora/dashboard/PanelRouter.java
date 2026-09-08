@@ -3,7 +3,6 @@ package quizora.dashboard;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import quizora.auth.UserSession;
 
@@ -20,10 +19,6 @@ public final class PanelRouter {
             default -> throw new IllegalStateException("Unsupported account role");
         };
         Parent root = FXMLLoader.load(PanelRouter.class.getResource("/Resources/fxml/" + view + ".fxml"));
-        stage.setScene(new Scene(root, 1180, 700));
-        stage.setTitle("Quizora - " + user.role() + " - " + user.fullName());
-        stage.setResizable(false);
-        stage.sizeToScene();
-        stage.centerOnScreen();
+        PanelWindow.show(stage, root, "Quizora - " + user.role() + " - " + user.fullName());
     }
 }

@@ -2,7 +2,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="quizora.dashboard.PanelController" prefWidth="1180" prefHeight="700"
+    fx:controller="quizora.dashboard.PanelController" prefWidth="1440" prefHeight="900" minWidth="0" minHeight="0"
     styleClass="dashboard-shell" stylesheets="@../../css/dashboard.css">
     <fx:define><ToggleGroup fx:id="navigationGroup"/></fx:define>
     <left>
@@ -29,6 +29,8 @@
         </VBox>
     </left>
     <center>
-        <StackPane fx:id="workspacePane" accessibleText="Dashboard workspace" styleClass="workspace"/>
+        <StackPane fx:id="workspacePane" accessibleText="Dashboard workspace" styleClass="workspace">
+            <fx:include fx:id="dashboardContent" source="overview.fxml"/>
+        </StackPane>
     </center>
 </BorderPane>

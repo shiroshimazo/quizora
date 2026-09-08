@@ -65,7 +65,8 @@ strategy. These cross-table workflow rules are not implemented by this schema.
 databaseConnection.getConnection() opens a fresh JDBC connection and propagates
 SQLException to its caller. Use it in DAOs with try-with-resources and run database
 work off the JavaFX application thread. The existing panels remain presentation
-shells; MySQL login and role routing are implemented, while CRUD behavior is pending.
+shells with a live administrator overview; login and role routing are implemented,
+while CRUD behavior is pending.
 
 ## Login and local demo accounts
 
@@ -96,8 +97,9 @@ plaintext and malformed hashes are rejected.
 userDAO uses a parameterized query; AuthenticationService verifies credentials.
 Database and hashing work run in a JavaFX Task, with a busy state and inline
 validation/error messages. An in-memory session holds only the user ID, name,
-and role. Logout clears it and opens a fresh login form. Main panel content
-remains blank. Registration and password reset are still unimplemented.
+and role. Logout clears it and opens a fresh login form. The admin dashboard shows
+live KPIs and charts; other feature pages remain blank. Registration and password
+reset are still unimplemented.
 
 LoginSmokeTest passed against MySQL and the actual JavaFX form for all three
 roles, including username/email login, role-specific menus, blank content,

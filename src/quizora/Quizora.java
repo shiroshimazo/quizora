@@ -95,10 +95,14 @@ public class Quizora extends Application {
         scene.getStylesheets().add(stylesheetUrl.toExternalForm());
 
         stage.setTitle("Quizora - Login");
+        stage.setMaximized(false);
+        stage.setMinWidth(0);
+        stage.setMinHeight(0);
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
         stage.sizeToScene();
+        stage.centerOnScreen();
 
         // Match the reference state and make the first field ready for typing.
         Platform.runLater(() -> {

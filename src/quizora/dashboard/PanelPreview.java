@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 import quizora.Quizora;
 
@@ -27,10 +26,7 @@ public class PanelPreview extends Application {
             throw new IllegalArgumentException("Preview role must be admin, teacher, or student");
         }
         Quizora.satoshi(14); // Register bundled font faces before loading CSS.
-        stage.setScene(new Scene(FXMLLoader.load(PanelPreview.class.getResource(view)), 1180, 700));
-        stage.setTitle("Quizora - " + role + " panel preview");
-        stage.setResizable(false);
-        stage.show();
+        PanelWindow.show(stage, FXMLLoader.load(PanelPreview.class.getResource(view)),
+                "Quizora - " + role + " panel preview");
     }
 }
-
