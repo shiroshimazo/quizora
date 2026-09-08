@@ -1,8 +1,8 @@
 package quizora.model;
 
-/** Editable student fields; role, password and historical records are not editable here. */
-public record StudentChanges(String name, String username, String email, boolean active) {
-    public StudentChanges {
+/** Shared editable account fields; role, password and historical records are not editable here. */
+public record AccountChanges(String name, String username, String email, boolean active) {
+    public AccountChanges {
         name = name == null ? "" : name.strip();
         username = username == null ? "" : username.strip();
         email = email == null ? "" : email.strip();

@@ -2,8 +2,8 @@ package quizora.model;
 
 import java.util.Locale;
 
-/** Student list projection; excludes credentials and preserves archive state. */
-public record StudentRecord(long id, String name, String username, String email,
+/** Managed account list projection; excludes credentials and preserves archive state. */
+public record AccountRecord(long id, String name, String username, String email,
         boolean active, boolean archived) {
     public String status() { return archived ? "Archived" : active ? "Active" : "Inactive"; }
 

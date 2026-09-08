@@ -32,6 +32,7 @@
         <StackPane fx:id="workspacePane" accessibleText="Dashboard workspace" styleClass="workspace">
             <fx:include fx:id="dashboardContent" source="overview.fxml"/>
             <fx:include fx:id="studentContent" source="studentManagement.fxml"/>
+            <fx:include fx:id="teacherContent" source="teacherManagement.fxml"/>
         </StackPane>
     </center>
 </BorderPane>

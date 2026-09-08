@@ -6,8 +6,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
-import quizora.model.StudentChanges;
-import quizora.model.StudentRecord;
+import quizora.model.AccountChanges;
+import quizora.model.AccountRecord;
 
 public class StudentEditController {
     @FXML private TextField nameField, usernameField, emailField;
@@ -38,7 +38,7 @@ public class StudentEditController {
         confirmPasswordField.clear();
     }
 
-    public void populate(StudentRecord student) {
+    public void populate(AccountRecord student) {
         nameField.setText(student.name());
         usernameField.setText(student.username());
         emailField.setText(student.email());
@@ -46,9 +46,9 @@ public class StudentEditController {
         editStatusFilter.setValue(student.status());
     }
 
-    public StudentChanges changes() {
+    public AccountChanges changes() {
         if (editStatusFilter.getValue() == null) throw new IllegalArgumentException("Select a status.");
-        return new StudentChanges(nameField.getText(), usernameField.getText(), emailField.getText(),
+        return new AccountChanges(nameField.getText(), usernameField.getText(), emailField.getText(),
                 "Active".equals(editStatusFilter.getValue()));
     }
 
