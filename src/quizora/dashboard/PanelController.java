@@ -32,6 +32,9 @@ public class PanelController implements Initializable {
     @FXML private javafx.scene.Node subjectContent;
     @FXML private quizora.controllerAdmin.subjectCategoryManagementController subjectContentController;
 
+    @FXML private javafx.scene.Node reportsContent;
+    @FXML private quizora.controllerAdmin.reportsController reportsContentController;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         navigationGroup.selectedToggleProperty().addListener((observable, previous, selected) -> {
@@ -56,6 +59,12 @@ public class PanelController implements Initializable {
             studentContent.setVisible(students);
             studentContent.setManaged(students);
             if (students) studentContentController.refresh();
+        }
+        if (reportsContent != null) {
+            boolean reports = "reportsButton".equals(destination.getId());
+            reportsContent.setVisible(reports);
+            reportsContent.setManaged(reports);
+            if (reports) reportsContentController.refresh();
         }
         if (subjectContent != null) {
             boolean subjects = "subjectCategoryManagementButton".equals(destination.getId());

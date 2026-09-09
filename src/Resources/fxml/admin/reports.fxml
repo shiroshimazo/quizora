@@ -1,1 +1,34 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quizora.controllerAdmin.reportsController"
+ fx:id="reportsScroll" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" visible="false" managed="false" styleClass="overview-scroll">
+ <content><VBox spacing="22" minWidth="0" styleClass="admin-overview">
+  <HBox alignment="CENTER_LEFT" spacing="16">
+   <VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS">
+    <Label text="ADMINISTRATION" styleClass="overview-eyebrow"/>
+    <Label text="Reports" styleClass="overview-title"/>
+    <Label text="View and export all-time quiz, student and teacher statistics." wrapText="true" styleClass="overview-muted"/>
+   </VBox>
+   <Button fx:id="refreshReportsButton" text="Refresh" onAction="#refresh" accessibleText="Refresh reports" styleClass="refresh-button"/>
+  </HBox>
+  <GridPane fx:id="reportsKpiGrid" hgap="18" vgap="18" minWidth="0">
+   <VBox spacing="10" styleClass="kpi-card"><Label text="Total quizzes" styleClass="kpi-title"/><Label fx:id="reportQuizzesValue" text="?" styleClass="kpi-value"/></VBox>
+   <VBox spacing="10" styleClass="kpi-card"><Label text="Total students" styleClass="kpi-title"/><Label fx:id="reportStudentsValue" text="?" styleClass="kpi-value"/></VBox>
+   <VBox spacing="10" styleClass="kpi-card"><Label text="Total teachers" styleClass="kpi-title"/><Label fx:id="reportTeachersValue" text="?" styleClass="kpi-value"/></VBox>
+  </GridPane>
+  <VBox spacing="16" styleClass="chart-card" minWidth="0" VBox.vgrow="ALWAYS">
+   <FlowPane hgap="16" vgap="12">
+    <VBox spacing="6"><Label text="Report type" labelFor="$reportType"/><ComboBox fx:id="reportType" prefWidth="220" accessibleText="Report type" styleClass="management-input"/></VBox>
+    <VBox spacing="6"><Label text="Passing score (%)" labelFor="$passThreshold"/><Spinner fx:id="passThreshold" prefWidth="140" accessibleText="Passing score percentage" styleClass="management-input"/></VBox>
+    <Button fx:id="exportReportButton" text="Export PDF" onAction="#exportPdf" accessibleText="Export displayed report as PDF" styleClass="refresh-button"/>
+   </FlowPane>
+   <Label fx:id="reportsMessage" text="Select Reports to generate statistics." wrapText="true" styleClass="overview-muted"/>
+   <Label fx:id="reportHeading" text="Quiz statistics" styleClass="chart-heading"/>
+   <TableView fx:id="reportTable" minWidth="0" minHeight="300" prefHeight="660" VBox.vgrow="ALWAYS" accessibleText="Report statistics" styleClass="student-table">
+    <columns><TableColumn fx:id="metricColumn" text="Metric" minWidth="220" prefWidth="550" sortable="false"/><TableColumn fx:id="valueColumn" text="Value" minWidth="100" prefWidth="180" sortable="false"/></columns>
+   </TableView>
+   <Label fx:id="reportNotes" wrapText="true" styleClass="overview-muted"/>
+  </VBox>
+ </VBox></content>
+</ScrollPane>
