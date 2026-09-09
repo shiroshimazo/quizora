@@ -1,1 +1,31 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+ fx:controller="quizora.controllerTeacher.quizStatisticsController" fx:id="statisticsScroll"
+ fitToWidth="true" hbarPolicy="NEVER" visible="false" managed="false" styleClass="overview-scroll">
+ <content><VBox spacing="22" minWidth="0" styleClass="admin-overview">
+  <Label text="TEACHING WORKSPACE" styleClass="overview-eyebrow"/>
+  <Label text="Quiz statistics" wrapText="true" styleClass="overview-title"/>
+  <Label text="Compare quiz performance and participation across your quizzes, including archived history." wrapText="true" styleClass="overview-muted"/>
+  <FlowPane hgap="14" vgap="12">
+   <VBox spacing="6"><Label text="Quiz" labelFor="$quizFilter"/><ComboBox fx:id="quizFilter" prefWidth="270" accessibleText="Select a quiz for statistics" promptText="All quizzes" styleClass="management-input"/></VBox>
+   <Button fx:id="allQuizzesButton" text="All quizzes" accessibleText="Show statistics for all your quizzes" onAction="#allQuizzes" styleClass="row-action"/>
+   <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh your quiz statistics" onAction="#refresh" styleClass="refresh-button"/>
+  </FlowPane>
+  <Label fx:id="statusLabel" text="Open Quiz Statistics to load your data." wrapText="true" styleClass="overview-muted"/>
+  <GridPane fx:id="kpiGrid" hgap="18" vgap="18" minWidth="0">
+   <VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Attempts" styleClass="kpi-title"/><Label fx:id="attemptsValue" text="&#8212;" styleClass="kpi-value"/><Label text="All time, including retakes" wrapText="true" styleClass="overview-muted"/></VBox>
+   <VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Submitted" styleClass="kpi-title"/><Label fx:id="submittedValue" text="&#8212;" styleClass="kpi-value"/><Label text="Includes submissions awaiting scores" wrapText="true" styleClass="overview-muted"/></VBox>
+   <VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Completion rate" wrapText="true" styleClass="kpi-title"/><Label fx:id="completionValue" text="&#8212;" styleClass="kpi-value"/><Label text="Submitted attempts / all attempts" wrapText="true" styleClass="overview-muted"/></VBox>
+   <VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Average score" styleClass="kpi-title"/><Label fx:id="averageValue" text="&#8212;" styleClass="kpi-value"/><Label text="Mean finalized attempt percentage" wrapText="true" styleClass="overview-muted"/></VBox>
+  </GridPane>
+  <GridPane fx:id="chartGrid" hgap="18" vgap="18" minWidth="0">
+   <VBox spacing="10" minWidth="0" styleClass="chart-card"><Label text="Quiz performance" styleClass="chart-heading"/><Label text="Average score for up to 8 quizzes with the most scored submissions. Quiz IDs identify bars." wrapText="true" styleClass="overview-muted"/><StackPane minWidth="0"><BarChart fx:id="performanceChart" animated="false" legendVisible="false" prefHeight="320" minWidth="0" accessibleText="Average score by quiz"><xAxis><CategoryAxis label="Quiz ID"/></xAxis><yAxis><NumberAxis label="Average score (%)" autoRanging="false" lowerBound="0" upperBound="100" tickUnit="20"/></yAxis></BarChart><Label fx:id="performanceEmpty" text="Data unavailable" styleClass="chart-empty" mouseTransparent="true"/></StackPane></VBox>
+   <VBox spacing="10" minWidth="0" styleClass="chart-card"><Label text="Attempt progress" styleClass="chart-heading"/><Label text="All-time submitted and in-progress attempts" wrapText="true" styleClass="overview-muted"/><StackPane minWidth="0"><PieChart fx:id="progressChart" animated="false" prefHeight="320" minWidth="0" accessibleText="Submitted versus in-progress attempts"/><Label fx:id="progressEmpty" text="Data unavailable" styleClass="chart-empty" mouseTransparent="true"/></StackPane></VBox>
+  </GridPane>
+  <VBox spacing="10" minWidth="0" styleClass="chart-card"><Label text="Submission trend" styleClass="chart-heading"/><Label fx:id="periodLabel" text="Last 14 database-calendar days" styleClass="overview-muted" wrapText="true"/><StackPane minWidth="0"><LineChart fx:id="trendChart" animated="false" legendVisible="false" prefHeight="320" minWidth="0" accessibleText="Daily submissions over the last fourteen days"><xAxis><CategoryAxis label="Date"/></xAxis><yAxis><NumberAxis label="Submissions"/></yAxis></LineChart><Label fx:id="trendEmpty" text="Data unavailable" styleClass="chart-empty" mouseTransparent="true"/></StackPane></VBox>
+  <VBox spacing="14" minWidth="0" styleClass="chart-card"><Label text="Quiz comparison" styleClass="chart-heading"/><Label text="Quizzes with no attempts remain visible. Scores exclude unfinished and unscored attempts." wrapText="true" styleClass="overview-muted"/><TableView fx:id="quizTable" minWidth="0" minHeight="280" prefHeight="350" accessibleText="Per-quiz statistics" styleClass="student-table"/><Label fx:id="quizCount" text="0 quizzes shown" styleClass="overview-muted"/></VBox>
+ </VBox></content>
+</ScrollPane>
