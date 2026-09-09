@@ -16,12 +16,15 @@ public final class QuizEditor extends ScrollPane {
     private final List<QuestionForm> forms=new ArrayList<>();
     private final QuizDetails original;
     public QuizEditor(QuizManagementDAO.Data data,QuizDetails original,boolean readOnly){
+        this(data, original, readOnly, false);
+    }
+    public QuizEditor(QuizManagementDAO.Data data,QuizDetails original,boolean readOnly,boolean teacherCreation){
         this.original=original;
         var content=new VBox(10);content.getStyleClass().add("student-editor");setContent(content);setFitToWidth(true);setPrefViewportWidth(620);setPrefViewportHeight(560);
         title.setId("quizTitleField");minutes.setId("quizMinutesField");description.setId("quizDescriptionField");subject.setId("quizSubjectField");teacher.setId("quizTeacherField");status.setId("quizStateField");
         subject.getItems().setAll(data.subjects());teacher.getItems().setAll(data.teachers());status.getItems().setAll("draft","published","closed");status.setValue("draft");
         subject.setMaxWidth(Double.MAX_VALUE);teacher.setMaxWidth(Double.MAX_VALUE);status.setMaxWidth(Double.MAX_VALUE);description.setPrefRowCount(2);description.setWrapText(true);
-        field(content,"Title *",title);field(content,"Description",description);field(content,"Subject *",subject);field(content,"Teacher *",teacher);field(content,"Time limit (minutes) *",minutes);field(content,"Status *",status);
+        field(content,"Title *",title);field(content,"Description",description);field(content,"Subject *",subject);if(!teacherCreation)field(content,"Teacher *",teacher);else teacher.setValue(data.teachers().getFirst());field(content,"Time limit (minutes) *",minutes);if(!teacherCreation)field(content,"Status *",status);
         var heading=new Label("Questions");heading.getStyleClass().add("chart-heading");content.getChildren().addAll(heading,questions);
         Button add=new Button("Add question");add.setId("addQuestionButton");add.getStyleClass().add("row-action");add.setOnAction(e->add(null));content.getChildren().add(add);
         if(original!=null){var q=original.quiz();title.setText(q.title());description.setText(q.description());minutes.setText(""+q.minutes());status.setValue(q.state());

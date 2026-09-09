@@ -26,6 +26,31 @@ public final class QuizManagementDAO {
             c.commit();return new Data(List.copyOf(records),subjects,teachers);
         }
     }
+    public Data teacherCreationData(AuthenticatedUser teacher) throws SQLException {
+        try(var c=databaseConnection.getConnection()) {
+            c.setAutoCommit(false);
+            requireTeacher(c,teacher);
+            var subjects=new ArrayList<QuizChoice>();
+            try(var s=c.prepareStatement("SELECT s.subject_id,s.subject_name FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND s.archived_at IS NULL ORDER BY s.subject_name")) {
+                s.setQueryTimeout(10);s.setLong(1,teacher.id());
+                try(var r=s.executeQuery()){while(r.next())subjects.add(new QuizChoice(r.getLong(1),r.getString(2)));}
+            }
+            c.commit();return new Data(List.of(),List.copyOf(subjects),List.of(new QuizChoice(teacher.id(),teacher.fullName())));
+        }
+    }
+    private static void requireTeacher(Connection c,AuthenticatedUser teacher)throws SQLException {
+        if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
+        try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL FOR SHARE")) {
+            s.setQueryTimeout(10);s.setLong(1,teacher.id());
+            try(var r=s.executeQuery()){if(!r.next())throw new SecurityException("Active teacher access is required.");}
+        }
+    }
+    public QuizRecord createForTeacher(AuthenticatedUser teacher,QuizChanges change,List<QuizQuestion> items)throws SQLException {
+        if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
+        if(change.teacherId()!=teacher.id())throw new SecurityException("You can only create your own quizzes.");
+        if(!List.of("draft","published").contains(change.state()))throw new IllegalArgumentException("Create a draft or published quiz.");
+        return save(teacher,null,change,items,true);
+    }
     private List<QuizChoice> choices(Connection c,String sql)throws SQLException{
         var list=new ArrayList<QuizChoice>();
         try(var s=c.prepareStatement(sql)){s.setQueryTimeout(10);try(var r=s.executeQuery()){while(r.next())list.add(new QuizChoice(r.getLong(1),r.getString(2)));}}
@@ -49,13 +74,22 @@ public final class QuizManagementDAO {
         }}return List.copyOf(list);
     }
     public QuizRecord save(AuthenticatedUser admin,QuizDetails original,QuizChanges change,List<QuizQuestion> items)throws SQLException{
+        return save(admin,original,change,items,false);
+    }
+    private QuizRecord save(AuthenticatedUser admin,QuizDetails original,QuizChanges change,List<QuizQuestion> items,boolean teacherCreation)throws SQLException{
         Objects.requireNonNull(change);items=List.copyOf(items);
         if(items.size()>500)throw new IllegalArgumentException("A quiz can contain at most 500 questions.");
         if(change.state().equals("published")&&items.isEmpty())throw new IllegalArgumentException("Add at least one question before publishing.");
         try(var c=databaseConnection.getConnection()){
             c.setAutoCommit(false);
             try{
-                AccountManagementDAO.requireAdmin(c,admin,true);
+                if(teacherCreation){
+                    requireTeacher(c,admin);
+                    try(var s=c.prepareStatement("SELECT ts.subject_id FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND ts.subject_id=? AND s.archived_at IS NULL FOR SHARE")) {
+                        s.setQueryTimeout(10);s.setLong(1,admin.id());s.setLong(2,change.subjectId());
+                        try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("This subject is no longer assigned to you or has been archived. Refresh subjects and try again.");}
+                    }
+                }else AccountManagementDAO.requireAdmin(c,admin,true);
                 long id=original==null?0:original.quiz().id();
                 QuizRecord current=null;
                 if(original!=null){

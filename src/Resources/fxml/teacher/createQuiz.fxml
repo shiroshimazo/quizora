@@ -1,1 +1,16 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="quizora.controllerTeacher.createQuizController" spacing="16" minWidth="0" styleClass="admin-overview">
+    <Label text="QUIZ BUILDER" styleClass="overview-eyebrow"/>
+    <Label text="Create quiz" styleClass="overview-title"/>
+    <Label text="Choose an assigned subject, then add questions and the correct answers. Save a draft or publish when ready." wrapText="true" styleClass="overview-muted"/>
+    <FlowPane hgap="10" vgap="10">
+        <Button fx:id="refreshSubjectsButton" text="Refresh subjects" accessibleText="Refresh your assigned subjects" onAction="#refreshSubjects" styleClass="row-action"/>
+        <Button fx:id="draftButton" text="Save draft" accessibleText="Save quiz as a draft" onAction="#saveDraft" styleClass="row-action" disable="true"/>
+        <Button fx:id="publishButton" text="Publish quiz" accessibleText="Publish quiz for students" onAction="#publish" styleClass="refresh-button" disable="true"/>
+    </FlowPane>
+    <Label fx:id="statusLabel" text="Open this panel to load your assigned subjects." wrapText="true" styleClass="overview-muted"/>
+    <StackPane fx:id="editorPane" minWidth="0" minHeight="0" VBox.vgrow="ALWAYS"/>
+</VBox>
