@@ -99,7 +99,7 @@ public final class LoginSmokeTest {
                     require(scene.getRoot().lookupAll(".navigation-button").size()
                             == Integer.parseInt(account[2]), "Role-specific menu");
                     require(((StackPane) scene.lookup("#workspacePane")).getChildren().isEmpty()
-                            != account[0].equals("admin"), "Only admin has dashboard content");
+                            == account[0].equals("student"), "Admin and teacher have dashboard content");
                     require(stage.isResizable(), "Role panels must be resizable");
                     var screen = javafx.stage.Screen.getScreensForRectangle(stage.getX(), stage.getY(),
                             stage.getWidth(), stage.getHeight()).getFirst().getVisualBounds();
@@ -123,7 +123,7 @@ public final class LoginSmokeTest {
                 });
             }
             System.out.println("PASS: hashes, invalid/inactive/injection rejection, username/email login, "
-                    + "all three real UI routes, live admin dashboard, blank teacher/student panels and logout.");
+                    + "all three real UI routes, live admin dashboard, teacher dashboard and blank student panel and logout.");
         } finally {
             try {
                 fx(() -> { quizora.dashboard.PanelController.confirmOverride = null;

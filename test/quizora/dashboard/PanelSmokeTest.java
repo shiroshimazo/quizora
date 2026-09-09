@@ -49,6 +49,7 @@ public class PanelSmokeTest {
                                 || "reportsButton".equals(button.getId())
                                 || "resultsButton".equals(button.getId())
                                 || "accountManagementButton".equals(button.getId()));
+                        expectsDashboard |= i == 1 && "dashboardButton".equals(button.getId());
                         boolean hasVisibleContent = workspace.getChildren().stream().anyMatch(javafx.scene.Node::isVisible);
                         if (hasVisibleContent != expectsDashboard) throw new AssertionError("Wrong workspace content");
                         if (button.getBoundsInParent().getMaxY() > 550)
@@ -64,7 +65,7 @@ public class PanelSmokeTest {
                         throw new AssertionError("Logout did not open login");
                     stage.close();
                 }
-                System.out.println("PASS: three role layouts, 19 destinations, admin overview visibility, blank feature pages, logout.");
+                System.out.println("PASS: three role layouts, 19 destinations, admin and teacher overview visibility, blank feature pages, logout.");
             } catch (Throwable error) {
                 failure.set(error);
             } finally {
