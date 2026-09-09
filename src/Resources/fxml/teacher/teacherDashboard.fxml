@@ -29,6 +29,7 @@
     <center>
         <StackPane fx:id="workspacePane" accessibleText="Dashboard workspace" styleClass="workspace">
             <fx:include fx:id="dashboardContent" source="overview.fxml"/>
+            <fx:include fx:id="studentResultsContent" source="studentResults.fxml"/>
             <fx:include fx:id="assignedSubjectsContent" source="assignedSubjects.fxml"/>
             <fx:include fx:id="createQuizContent" source="createQuiz.fxml" visible="false" managed="false"/>
         </StackPane>

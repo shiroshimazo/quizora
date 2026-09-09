@@ -1,1 +1,30 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quizora.controllerTeacher.studentResultsController" fx:id="resultsScroll" fitToWidth="true" hbarPolicy="NEVER" visible="false" managed="false" styleClass="overview-scroll">
+ <content><VBox spacing="22" minWidth="0" styleClass="admin-overview">
+  <HBox alignment="CENTER_LEFT" spacing="16"><VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS"><Label text="TEACHING WORKSPACE" styleClass="overview-eyebrow"/><Label text="Student results" styleClass="overview-title"/><Label text="Review finalized scores for your own quizzes, including retakes and archived history." wrapText="true" styleClass="overview-muted"/></VBox><Button fx:id="refreshResultsButton" accessibleText="Refresh results for your quizzes" text="Refresh" onAction="#refresh" styleClass="refresh-button"/></HBox>
+  <FlowPane hgap="14" vgap="12">
+   <VBox spacing="6"><Label text="Search results" labelFor="$resultSearch"/><TextField fx:id="resultSearch" promptText="Student, quiz, subject or ID" prefWidth="230" styleClass="management-input"/></VBox>
+   <VBox spacing="6"><Label text="Subject" labelFor="$resultSubject"/><ComboBox fx:id="resultSubject" prefWidth="200" styleClass="management-input"/></VBox>
+   <VBox spacing="6"><Label text="Outcome" labelFor="$resultOutcome"/><ComboBox fx:id="resultOutcome" prefWidth="160" styleClass="management-input"/></VBox>
+   <VBox spacing="6"><Label text="View threshold (%)" labelFor="$resultThreshold"/><Spinner fx:id="resultThreshold" prefWidth="130" styleClass="management-input"/></VBox>
+   <VBox spacing="6"><Label text="Submitted from" labelFor="$resultFrom"/><DatePicker fx:id="resultFrom" prefWidth="165" styleClass="management-input"/></VBox>
+   <VBox spacing="6"><Label text="Submitted through" labelFor="$resultTo"/><DatePicker fx:id="resultTo" prefWidth="165" styleClass="management-input"/></VBox>
+   <Button fx:id="resetResultsButton" accessibleText="Reset result filters" text="Reset filters" onAction="#resetFilters" styleClass="refresh-button"/>
+  </FlowPane>
+  <Label fx:id="resultsMessage" text="Select Student Results to load scores." wrapText="true" styleClass="overview-muted"/>
+  <GridPane fx:id="resultsKpiGrid" hgap="18" vgap="18" minWidth="0">
+<VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Scored submissions" wrapText="true" styleClass="kpi-title"/><Label fx:id="submissionsValue" text="&#8212;" styleClass="kpi-value"/></VBox>
+<VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Average score" wrapText="true" styleClass="kpi-title"/><Label fx:id="resultAverageValue" text="&#8212;" styleClass="kpi-value"/></VBox>
+<VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Pass rate" wrapText="true" styleClass="kpi-title"/><Label fx:id="resultPassValue" text="&#8212;" styleClass="kpi-value"/></VBox>
+<VBox spacing="10" minWidth="0" styleClass="kpi-card"><Label text="Unique students" wrapText="true" styleClass="kpi-title"/><Label fx:id="resultStudentsValue" text="&#8212;" styleClass="kpi-value"/></VBox>
+  </GridPane>
+  <GridPane fx:id="resultsChartGrid" hgap="18" vgap="18" minWidth="0">
+   <VBox spacing="10" minWidth="0" styleClass="chart-card"><Label text="Score distribution" styleClass="chart-heading"/><StackPane minWidth="0"><BarChart fx:id="distributionChart" minWidth="0" prefHeight="300" accessibleText="Submission counts by score band"><xAxis><CategoryAxis label="Score band"/></xAxis><yAxis><NumberAxis label="Submissions"/></yAxis></BarChart><Label fx:id="distributionEmpty" text="Data unavailable" styleClass="chart-empty" mouseTransparent="true"/></StackPane></VBox>
+   <VBox spacing="10" minWidth="0" styleClass="chart-card"><Label text="Pass / fail breakdown" styleClass="chart-heading"/><StackPane minWidth="0"><PieChart fx:id="outcomeChart" minWidth="0" prefHeight="300" accessibleText="Passed and failed submissions"/><Label fx:id="outcomeEmpty" text="Data unavailable" styleClass="chart-empty" mouseTransparent="true"/></StackPane></VBox>
+  </GridPane>
+  <VBox spacing="16" minWidth="0" styleClass="chart-card"><Label text="Student results" styleClass="chart-heading"/><Label text="Each row is one finalized submission to your quizzes. Average score is the mean percentage per attempt. The passing threshold only changes this view; it does not change stored scores." wrapText="true" styleClass="overview-muted"/><TableView fx:id="resultsTable" minWidth="0" minHeight="300" prefHeight="450" accessibleText="Student quiz results" styleClass="student-table"/><Label fx:id="resultCount" text="0 results shown" styleClass="overview-muted"/></VBox>
+ </VBox></content>
+</ScrollPane>
