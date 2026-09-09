@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS subjects (
     subject_name VARCHAR(100) NOT NULL UNIQUE,
     category VARCHAR(100),
     description TEXT,
+    archived_at TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

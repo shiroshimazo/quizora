@@ -21,7 +21,7 @@ public final class QuizManagementDAO {
             AccountManagementDAO.requireAdmin(c,admin,false);
             var records=new ArrayList<QuizRecord>();
             try(var s=c.prepareStatement(SELECT+" ORDER BY q.quiz_id DESC")){s.setQueryTimeout(10);try(var r=s.executeQuery()){while(r.next())records.add(read(r));}}
-            var subjects=choices(c,"SELECT subject_id,subject_name FROM subjects ORDER BY subject_name");
+            var subjects=choices(c,"SELECT subject_id,subject_name FROM subjects WHERE archived_at IS NULL ORDER BY subject_name");
             var teachers=choices(c,"SELECT user_id,full_name FROM users WHERE role='teacher' AND is_active=TRUE AND archived_at IS NULL ORDER BY full_name");
             c.commit();return new Data(List.copyOf(records),subjects,teachers);
         }
@@ -70,8 +70,9 @@ public final class QuizManagementDAO {
                         if(!r.next()&&(current==null||current.teacherId()!=change.teacherId()))throw new IllegalArgumentException("Select an active teacher.");
                     }
                 }
-                try(var s=c.prepareStatement("SELECT subject_id FROM subjects WHERE subject_id=? FOR SHARE")){
-                    s.setLong(1,change.subjectId());try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("Subject no longer exists. Refresh and try again.");}
+                try(var s=c.prepareStatement("SELECT subject_id,archived_at FROM subjects WHERE subject_id=? FOR SHARE")){
+                    s.setLong(1,change.subjectId());try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("Subject no longer exists. Refresh and try again.");
+                    if(r.getTimestamp("archived_at")!=null&&(current==null||current.subjectId()!=change.subjectId()))throw new IllegalArgumentException("Select an active subject.");}
                 }
                 String sql=id==0?"INSERT INTO quizzes(title,description,subject_id,teacher_id,time_limit_minutes,status) VALUES(?,?,?,?,?,?)":"UPDATE quizzes SET title=?,description=?,subject_id=?,teacher_id=?,time_limit_minutes=?,status=?,updated_at=CURRENT_TIMESTAMP WHERE quiz_id=?";
                 try(var s=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){

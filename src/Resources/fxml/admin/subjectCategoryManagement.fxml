@@ -1,1 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerAdmin.subjectCategoryManagementController"
+    fx:id="subjectScroll" fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
+    styleClass="overview-scroll" visible="false" managed="false">
+    <content>
+        <VBox spacing="22" minWidth="0" styleClass="admin-overview">
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS">
+                    <Label text="ADMINISTRATION" styleClass="overview-eyebrow"/>
+                    <Label text="Subject/Category Management" wrapText="true" styleClass="overview-title"/>
+                    <Label text="Organize subjects and categories for quizzes." wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <Button fx:id="refreshSubjectsButton" text="Refresh" accessibleText="Refresh subject records"
+                        onAction="#refresh" styleClass="refresh-button"/>
+            </HBox>
+            <GridPane fx:id="subjectKpiGrid" hgap="18" vgap="18" minWidth="0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.333" minWidth="0"/>
+                    <ColumnConstraints percentWidth="33.334" minWidth="0"/>
+                </columnConstraints>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="0">
+                    <Label text="Total subjects" styleClass="kpi-title"/>
+                    <Label fx:id="totalSubjectValue" text="0" styleClass="kpi-value"/>
+                    <Label text="All subjects, including archived" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="1">
+                    <Label text="Active subjects" styleClass="kpi-title"/>
+                    <Label fx:id="activeSubjectValue" text="0" styleClass="kpi-value"/>
+                    <Label text="Subjects available for new quizzes" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+                <VBox spacing="10" styleClass="kpi-card" GridPane.columnIndex="2">
+                    <Label text="Categories" styleClass="kpi-title"/>
+                    <Label fx:id="categoryValue" text="0" styleClass="kpi-value"/>
+                    <Label text="Distinct named categories" wrapText="true" styleClass="overview-muted"/>
+                </VBox>
+            </GridPane>
+            <VBox spacing="16" styleClass="chart-card" VBox.vgrow="ALWAYS" minWidth="0">
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Label text="Subject directory" styleClass="chart-heading" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button fx:id="addSubjectButton" text="Add subject" accessibleText="Add a new subject"
+                            onAction="#addSubject" styleClass="refresh-button"/>
+                </HBox>
+                <FlowPane hgap="16" vgap="10">
+                    <VBox spacing="6">
+                        <Label text="Search subjects" labelFor="$subjectSearch"/>
+                        <TextField fx:id="subjectSearch" promptText="ID, name, category or description"
+                                   prefWidth="300" accessibleText="Search subjects by ID, name, category or description" styleClass="management-input"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Status" labelFor="$subjectStatusFilter"/>
+                        <ComboBox fx:id="subjectStatusFilter" prefWidth="180" accessibleText="Filter subjects by status" styleClass="management-input"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Category" labelFor="$subjectCategoryFilter"/>
+                        <ComboBox fx:id="subjectCategoryFilter" prefWidth="180" accessibleText="Filter subjects by category" styleClass="management-input"/>
+                    </VBox>
+                </FlowPane>
+                <Label fx:id="subjectMessage" text="Select Subject/Category Management to load records." wrapText="true" styleClass="overview-muted"/>
+                <TableView fx:id="subjectTable" accessibleText="Subject directory"
+                           minWidth="0" minHeight="300" prefHeight="440" VBox.vgrow="ALWAYS" styleClass="student-table">
 
+                </TableView>
+                <Label fx:id="subjectResultCount" text="0 subjects shown" styleClass="overview-muted"/>
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>
