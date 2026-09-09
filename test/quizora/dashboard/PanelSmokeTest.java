@@ -46,7 +46,9 @@ public class PanelSmokeTest {
                                 || "teacherManagementButton".equals(button.getId())
                                 || "quizManagementButton".equals(button.getId())
                                 || "subjectCategoryManagementButton".equals(button.getId())
-                                || "reportsButton".equals(button.getId()));
+                                || "reportsButton".equals(button.getId())
+                                || "resultsButton".equals(button.getId())
+                                || "accountManagementButton".equals(button.getId()));
                         boolean hasVisibleContent = workspace.getChildren().stream().anyMatch(javafx.scene.Node::isVisible);
                         if (hasVisibleContent != expectsDashboard) throw new AssertionError("Wrong workspace content");
                         if (button.getBoundsInParent().getMaxY() > 550)

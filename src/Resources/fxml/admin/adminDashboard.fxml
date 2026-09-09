@@ -36,6 +36,8 @@
             <fx:include fx:id="quizContent" source="quizManagement.fxml"/>
             <fx:include fx:id="subjectContent" source="subjectCategoryManagement.fxml"/>
             <fx:include fx:id="reportsContent" source="reports.fxml"/>
+            <fx:include fx:id="resultsContent" source="results.fxml"/>
+            <fx:include fx:id="accountContent" source="accountManager.fxml"/>
         </StackPane>
     </center>
 </BorderPane>

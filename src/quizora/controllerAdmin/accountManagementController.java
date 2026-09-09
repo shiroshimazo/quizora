@@ -1,13 +1,37 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package quizora.controllerAdmin;
-
-/**
- *
- * @author Jeremy
- */
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.io.ByteArrayInputStream;
+import java.util.Base64;
+import javafx.fxml.FXML;
+import javafx.concurrent.Task;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
+import javafx.scene.layout.*;
+import javafx.event.ActionEvent;
+import javafx.stage.FileChooser;
+import quizora.auth.*;
+import quizora.DAO.AdminProfileDAO;
+import quizora.model.*;
 public class accountManagementController {
-    
+ @FXML private ScrollPane accountScroll;
+ @FXML private Label profileName,profileUsername,profileEmail,profileContact,profileCreated,profileInitials,accountMessage;
+ @FXML private ImageView profileImage;
+ @FXML private Button refreshAccountButton,editProfileButton,changePictureButton;
+ private final AdminProfileDAO dao=new AdminProfileDAO();
+ private AdminProfile profile;
+ private boolean busy;
+ @FXML private void initialize(){controls();}
+ @FXML public void refresh(){if(busy)return;var admin=UserSession.current();clear();accountMessage.setText("Loading profile...");run(()->dao.load(admin),p->{display(p);accountMessage.setText("Your profile is up to date.");},e->{clear();accountMessage.setText(error(e));});}
+ private void clear(){profile=null;for(Label l:java.util.List.of(profileName,profileUsername,profileEmail,profileContact,profileCreated))l.setText("?");profileImage.setImage(null);profileInitials.setText("?");profileInitials.setVisible(true);controls();}
+ void display(AdminProfile p){profile=p;profileName.setText(p.name());profileUsername.setText(p.username());profileEmail.setText(p.email());profileContact.setText(p.contact().isEmpty()?"Not provided":p.contact());profileCreated.setText(p.createdAt().toLocalDate().toString());profileInitials.setText(p.name().isBlank()?"?":p.name().substring(0,1).toUpperCase(java.util.Locale.ROOT));Image image=p.picture().isEmpty()?null:new Image(new ByteArrayInputStream(Base64.getDecoder().decode(p.picture())),180,180,true,true);profileImage.setImage(image);profileInitials.setVisible(image==null||image.isError());controls();}
+ @FXML private void editProfile(){if(busy||profile==null)return;AdminProfile original=profile;VBox form=new VBox(10);form.setPrefWidth(420);form.getStyleClass().add("student-editor");TextField name=field(form,"Full name *",original.name(),"profileNameField"),username=field(form,"Username *",original.username(),"profileUsernameField"),email=field(form,"Email *",original.email(),"profileEmailField"),contact=field(form,"Contact number",original.contact(),"profileContactField");Label message=new Label();message.setWrapText(true);message.setId("profileFormMessage");message.getStyleClass().add("management-error");form.getChildren().add(message);Dialog<ButtonType> dialog=dialog("Edit profile",form);ButtonType saveType=new ButtonType("Save changes",ButtonBar.ButtonData.OK_DONE);dialog.getDialogPane().getButtonTypes().add(0,saveType);Button save=(Button)dialog.getDialogPane().lookupButton(saveType);save.setId("saveProfileButton");save.addEventFilter(ActionEvent.ACTION,e->{e.consume();if(busy)return;try{var changes=new ProfileChanges(name.getText(),username.getText(),email.getText(),contact.getText());var identity=UserSession.current();lockForm(dialog,form,save,true);message.setText("Saving profile...");run(()->dao.save(identity,original,changes),p->{display(p);UserSession.signIn(new AuthenticatedUser(p.id(),p.name(),"admin"));accountMessage.setText("Profile updated successfully.");dialog.close();},failure->{lockForm(dialog,form,save,false);message.setText(error(failure));});}catch(IllegalArgumentException invalid){message.setText(invalid.getMessage());}});dialog.showAndWait();}
+ private TextField field(VBox form,String text,String value,String id){TextField input=new TextField(value);input.setId(id);input.setAccessibleText(text);input.getStyleClass().add("management-input");Label label=new Label(text);label.setLabelFor(input);form.getChildren().addAll(label,input);return input;}
+ private Dialog<ButtonType> dialog(String title,VBox form){Dialog<ButtonType> d=new Dialog<>();d.initOwner(accountScroll.getScene().getWindow());d.setTitle(title);d.getDialogPane().setContent(form);d.getDialogPane().getStylesheets().add(getClass().getResource("/Resources/css/dashboard.css").toExternalForm());d.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);d.setOnCloseRequest(e->{if(busy)e.consume();});return d;}
+ private void lockForm(Dialog<?> d,VBox form,Button save,boolean locked){form.setDisable(locked);save.setDisable(locked);d.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(locked);}
+ @FXML private void changePicture(){if(busy||profile==null)return;FileChooser chooser=new FileChooser();chooser.setTitle("Choose profile picture");chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG or JPEG image","*.png","*.jpg","*.jpeg"));var file=chooser.showOpenDialog(accountScroll.getScene().getWindow());if(file==null)return;run(()->ProfilePicture.read(file.toPath()),this::previewPicture,e->accountMessage.setText(error(e)));}
+ void previewPicture(byte[] bytes){if(profile==null)return;AdminProfile original=profile;VBox form=new VBox(14);form.getStyleClass().add("student-editor");ImageView preview=new ImageView(new Image(new ByteArrayInputStream(bytes),260,260,true,true));preview.setPreserveRatio(true);preview.setFitWidth(260);preview.setFitHeight(260);Label message=new Label("Save this picture to your profile?");message.setWrapText(true);form.getChildren().addAll(preview,message);Dialog<ButtonType> d=dialog("Preview profile picture",form);ButtonType type=new ButtonType("Save picture",ButtonBar.ButtonData.OK_DONE);d.getDialogPane().getButtonTypes().add(0,type);Button save=(Button)d.getDialogPane().lookupButton(type);save.setId("savePictureButton");save.addEventFilter(ActionEvent.ACTION,e->{e.consume();if(busy)return;var identity=UserSession.current();lockForm(d,form,save,true);run(()->dao.picture(identity,original,bytes),p->{display(p);accountMessage.setText("Profile picture updated.");d.close();},failure->{lockForm(d,form,save,false);message.setText(error(failure));});});d.showAndWait();}
+ private <T> void run(Callable<T> work,Consumer<T> success,Consumer<Throwable> failure){if(busy)return;busy=true;controls();var identity=UserSession.current();Task<T> task=new Task<>(){protected T call()throws Exception{return work.call();}};task.setOnSucceeded(e->{busy=false;controls();if(UserSession.current()==identity)success.accept(task.getValue());else{clear();failure.accept(new SecurityException());}});task.setOnFailed(e->{busy=false;controls();if(UserSession.current()!=identity)clear();failure.accept(UserSession.current()==identity?task.getException():new SecurityException());});Thread t=new Thread(task,"quizora-own-profile");t.setDaemon(true);t.start();}
+ private void controls(){refreshAccountButton.setDisable(busy);editProfileButton.setDisable(busy||profile==null);changePictureButton.setDisable(busy||profile==null);}
+ private String error(Throwable e){if(e instanceof SecurityException)return "Administrator access is required. Sign in again.";if(e instanceof IllegalArgumentException)return e.getMessage();if(e instanceof java.sql.SQLException sql){if(sql.getErrorCode()==1062)return "That username or email is already in use.";if("40001".equals(sql.getSQLState()))return "Profile changed. Close this form, refresh and try again.";}if(e instanceof java.io.IOException)return "Unable to read the picture. Choose a valid PNG or JPEG image.";return "Unable to complete the request. Check the database connection and try again.";}
 }

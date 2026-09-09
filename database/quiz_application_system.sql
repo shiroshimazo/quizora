@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(254) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    contact_number VARCHAR(50) NULL,
+    profile_picture MEDIUMBLOB NULL,
     role ENUM('admin', 'teacher', 'student') NOT NULL DEFAULT 'student',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     archived_at TIMESTAMP NULL DEFAULT NULL,
