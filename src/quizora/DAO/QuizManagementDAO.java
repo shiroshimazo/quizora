@@ -38,7 +38,7 @@ public final class QuizManagementDAO {
             c.commit();return new Data(List.of(),List.copyOf(subjects),List.of(new QuizChoice(teacher.id(),teacher.fullName())));
         }
     }
-    private static void requireTeacher(Connection c,AuthenticatedUser teacher)throws SQLException {
+    static void requireTeacher(Connection c,AuthenticatedUser teacher)throws SQLException {
         if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
         try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL FOR SHARE")) {
             s.setQueryTimeout(10);s.setLong(1,teacher.id());

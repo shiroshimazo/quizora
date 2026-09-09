@@ -1,1 +1,31 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerTeacher.assignedSubjectsController" fx:id="assignedScroll"
+    fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" styleClass="overview-scroll" visible="false" managed="false">
+    <content><VBox spacing="22" minWidth="0" styleClass="admin-overview">
+        <Label text="TEACHING WORKSPACE" styleClass="overview-eyebrow"/>
+        <Label text="Assigned subjects" wrapText="true" styleClass="overview-title"/>
+        <Label text="Explore your teaching subjects and see your quiz coverage. Assignments are managed by your administrator." wrapText="true" styleClass="overview-muted"/>
+        <GridPane fx:id="kpiGrid" hgap="18" vgap="18" minWidth="0">
+            <VBox spacing="10" styleClass="kpi-card" minWidth="0"><Label text="Assigned subjects" wrapText="true" styleClass="kpi-title"/><Label fx:id="subjectsValue" text="?" styleClass="kpi-value"/><Label text="Current, non-archived assignments" wrapText="true" styleClass="overview-muted"/></VBox>
+            <VBox spacing="10" styleClass="kpi-card" minWidth="0"><Label text="My quizzes" wrapText="true" styleClass="kpi-title"/><Label fx:id="quizzesValue" text="?" styleClass="kpi-value"/><Label text="Across your assigned subjects" wrapText="true" styleClass="overview-muted"/></VBox>
+            <VBox spacing="10" styleClass="kpi-card" minWidth="0"><Label text="Published quizzes" wrapText="true" styleClass="kpi-title"/><Label fx:id="publishedValue" text="?" styleClass="kpi-value"/><Label text="Your published, non-archived quizzes" wrapText="true" styleClass="overview-muted"/></VBox>
+        </GridPane>
+        <VBox spacing="14" styleClass="chart-card" minWidth="0" VBox.vgrow="ALWAYS">
+            <Label text="Your subjects" styleClass="chart-heading"/>
+            <FlowPane hgap="14" vgap="10">
+                <VBox spacing="6"><Label text="Search subjects" labelFor="$subjectSearch"/><TextField fx:id="subjectSearch" prefWidth="240" promptText="Name, category or description" accessibleText="Search assigned subjects" styleClass="management-input"/></VBox>
+                <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh assigned subjects" onAction="#refresh" styleClass="refresh-button"/>
+            </FlowPane>
+            <Label fx:id="statusLabel" text="Open Assigned Subjects to load your assignments." wrapText="true" styleClass="overview-muted"/>
+            <TableView fx:id="subjectTable" accessibleText="Your assigned subjects and quiz counts" minWidth="0" minHeight="240" prefHeight="340" VBox.vgrow="ALWAYS" styleClass="student-table"/>
+            <Label fx:id="resultCount" text="0 subjects shown" styleClass="overview-muted"/>
+            <Separator/>
+            <Label fx:id="detailTitle" text="Subject details" wrapText="true" styleClass="chart-heading"/>
+            <Label fx:id="detailDescription" text="Select a subject to read its description." wrapText="true" styleClass="overview-muted"/>
+            <Label text="Use Create Quiz to build an assessment for an assigned subject. Quiz counts exclude archived quizzes and other teachers? quizzes." wrapText="true" styleClass="overview-muted"/>
+        </VBox>
+    </VBox></content>
+</ScrollPane>
