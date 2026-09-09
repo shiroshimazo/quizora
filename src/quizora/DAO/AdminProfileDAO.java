@@ -7,11 +7,14 @@ import quizora.auth.AuthenticatedUser;
 import quizora.database.databaseConnection;
 import quizora.model.*;
 
-public final class AdminProfileDAO {
+public class AdminProfileDAO {
+    protected void requireAccess(Connection c, AuthenticatedUser identity, boolean lock)throws SQLException {
+        AccountManagementDAO.requireAdmin(c,identity,lock);
+    }
     public AdminProfile load(AuthenticatedUser admin) throws SQLException {
         try (var c = databaseConnection.getConnection()) {
             c.setReadOnly(true); c.setAutoCommit(false);
-            AccountManagementDAO.requireAdmin(c, admin, false);
+            requireAccess(c, admin, false);
             var profile = read(c, admin.id(), false); c.commit(); return profile;
         }
     }
@@ -26,7 +29,7 @@ public final class AdminProfileDAO {
         try (var c = databaseConnection.getConnection()) {
             c.setAutoCommit(false);
             try {
-                AccountManagementDAO.requireAdmin(c, admin, true);
+                requireAccess(c, admin, true);
                 var current = read(c, admin.id(), true);
                 if (!current.equals(original)) throw new SQLException("Profile changed. Refresh and try again.", "40001");
                 if (changes != null) {

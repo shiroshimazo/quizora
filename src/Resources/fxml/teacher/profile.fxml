@@ -1,1 +1,23 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quizora.controllerTeacher.profileController" fx:id="accountScroll" fitToWidth="true" hbarPolicy="NEVER" visible="false" managed="false" styleClass="overview-scroll">
+ <content><VBox spacing="22" minWidth="0" styleClass="admin-overview">
+  <HBox alignment="CENTER_LEFT" spacing="16"><VBox spacing="6" minWidth="0" HBox.hgrow="ALWAYS"><Label text="TEACHING WORKSPACE" styleClass="overview-eyebrow"/><Label text="Profile" wrapText="true" styleClass="overview-title"/><Label text="Manage your profile information and picture." wrapText="true" styleClass="overview-muted"/></VBox><Button fx:id="refreshAccountButton" accessibleText="Refresh your teacher profile" text="Refresh" onAction="#refresh" styleClass="refresh-button"/></HBox>
+  <Label fx:id="accountMessage" text="Select Profile to load your profile." wrapText="true" styleClass="overview-muted"/>
+  <VBox spacing="20" minWidth="0" styleClass="chart-card">
+   <Label text="Your profile" styleClass="chart-heading"/>
+   <StackPane prefWidth="180" maxWidth="180" minHeight="180" prefHeight="180"><Label fx:id="profileInitials" text="&#8212;" styleClass="kpi-value"/><ImageView fx:id="profileImage" fitWidth="180" fitHeight="180" preserveRatio="true" accessibleText="Your profile picture"/></StackPane>
+   <FlowPane hgap="12" vgap="12"><Button fx:id="changePictureButton" accessibleText="Choose a new profile picture" text="Change picture" onAction="#changePicture" styleClass="row-action"/><Button fx:id="editProfileButton" accessibleText="Edit your name and contact details" text="Edit profile" onAction="#editProfile" styleClass="refresh-button"/></FlowPane>
+   <Label text="PNG or JPEG | Up to 2 MB | Maximum 4096 x 4096 pixels" wrapText="true" styleClass="overview-muted"/>
+   <Separator/>
+   <Label text="Full name" styleClass="overview-muted"/><Label fx:id="profileName" text="&#8212;" wrapText="true" styleClass="chart-heading"/>
+   <Label text="Username" styleClass="overview-muted"/><Label fx:id="profileUsername" text="&#8212;" wrapText="true"/>
+   <Label text="Email" styleClass="overview-muted"/><Label fx:id="profileEmail" text="&#8212;" wrapText="true"/>
+   <Label text="Contact number" styleClass="overview-muted"/><Label fx:id="profileContact" text="&#8212;" wrapText="true"/>
+   <Label text="Role" styleClass="overview-muted"/><Label text="Teacher"/>
+   <Label text="Member since" styleClass="overview-muted"/><Label fx:id="profileCreated" text="&#8212;"/>
+  </VBox>
+ </VBox></content>
+</ScrollPane>
