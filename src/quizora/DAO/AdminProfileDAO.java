@@ -12,8 +12,8 @@ public class AdminProfileDAO {
         AccountManagementDAO.requireAdmin(c,identity,lock);
     }
     public AdminProfile load(AuthenticatedUser admin) throws SQLException {
-        try (var c = databaseConnection.getConnection()) {
-            c.setReadOnly(true); c.setAutoCommit(false);
+        try (var c = databaseConnection.getReadOnlyConnection()) {
+            c.setAutoCommit(false);
             requireAccess(c, admin, false);
             var profile = read(c, admin.id(), false); c.commit(); return profile;
         }
@@ -33,7 +33,7 @@ public class AdminProfileDAO {
                 var current = read(c, admin.id(), true);
                 if (!current.equals(original)) throw new SQLException("Profile changed. Refresh and try again.", "40001");
                 if (changes != null) {
-                    try (var s = c.prepareStatement("SELECT user_id FROM users WHERE user_id<>? AND (username IN (?,?) OR email IN (?,?)) FOR UPDATE")) {
+                    try (var s = c.prepareStatement("SELECT user_id FROM users WHERE user_id<>? AND (username IN (?,?) OR email IN (?,?))")) {
                         s.setQueryTimeout(10); s.setLong(1, admin.id()); s.setString(2, changes.username()); s.setString(3, changes.email()); s.setString(4, changes.username()); s.setString(5, changes.email());
                         try (var r = s.executeQuery()) { if (r.next()) throw new SQLException("Username or email already in use.", "23000", 1062); }
                     }
@@ -49,7 +49,7 @@ public class AdminProfileDAO {
         }
     }
     private AdminProfile read(Connection c, long id, boolean lock) throws SQLException {
-        try (var s = c.prepareStatement("SELECT user_id,full_name,username,email,contact_number,profile_picture,created_at FROM users WHERE user_id=?" + (lock ? " FOR UPDATE" : ""))) {
+        try (var s = c.prepareStatement("SELECT user_id,full_name,username,email,contact_number,profile_picture,created_at FROM users WHERE user_id=?")) {
             s.setQueryTimeout(10); s.setLong(1, id);
             try (var r = s.executeQuery()) {
                 if (!r.next()) throw new SecurityException("Account unavailable.");

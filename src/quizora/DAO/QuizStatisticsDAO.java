@@ -9,15 +9,15 @@ import quizora.model.QuizStatisticsData.*;
 
 public final class QuizStatisticsDAO {
     public QuizStatisticsData load(AuthenticatedUser teacher)throws SQLException {
-        try(var c=databaseConnection.getConnection()) {
-            c.setReadOnly(true);c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
+        try(var c=databaseConnection.getReadOnlyConnection()) {
+            c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
             QuizManagementDAO.requireTeacher(c,teacher);
             var data=read(c,teacher.id());c.commit();return data;
         }
     }
     QuizStatisticsData read(Connection c,long teacherId)throws SQLException {
         java.time.LocalDate today;
-        try(var s=c.prepareStatement("SELECT CURRENT_DATE")){s.setQueryTimeout(10);try(var r=s.executeQuery()){r.next();today=r.getDate(1).toLocalDate();}}
+        try(var s=c.prepareStatement("SELECT date('now','localtime')")){s.setQueryTimeout(10);try(var r=s.executeQuery()){r.next();today=java.time.LocalDate.parse(r.getString(1));}}
         var quizzes=new ArrayList<Summary>();
         try(var s=c.prepareStatement("""
             SELECT q.quiz_id,q.title,s.subject_name,q.status,q.archived_at,
@@ -47,7 +47,7 @@ public final class QuizStatisticsDAO {
             GROUP BY q.quiz_id,DATE(a.submitted_at) ORDER BY day,q.quiz_id
             """)) {
             s.setQueryTimeout(15);s.setLong(1,teacherId);s.setDate(2,java.sql.Date.valueOf(today.minusDays(13)));s.setDate(3,java.sql.Date.valueOf(today.plusDays(1)));
-            try(var r=s.executeQuery()){while(r.next())days.add(new Daily(r.getLong(1),r.getDate(2).toLocalDate(),r.getLong(3)));}
+            try(var r=s.executeQuery()){while(r.next())days.add(new Daily(r.getLong(1),java.time.LocalDate.parse(r.getString(2)),r.getLong(3)));}
         }
         return new QuizStatisticsData(today,List.copyOf(quizzes),List.copyOf(days));
     }

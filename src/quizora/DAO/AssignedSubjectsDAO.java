@@ -8,8 +8,8 @@ import quizora.model.AssignedSubject;
 
 public final class AssignedSubjectsDAO {
     public List<AssignedSubject> load(AuthenticatedUser teacher)throws SQLException {
-        try(var c=databaseConnection.getConnection()) {
-            c.setReadOnly(true);c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
+        try(var c=databaseConnection.getReadOnlyConnection()) {
+            c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
             QuizManagementDAO.requireTeacher(c,teacher);
             var result=readAssignments(c,teacher.id());c.commit();return result;
         }

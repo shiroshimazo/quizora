@@ -1,2 +1,4 @@
 /build/
 /dist/
+/database/quizora.db
+/database/quizora.db-journal

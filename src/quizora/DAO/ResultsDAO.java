@@ -6,14 +6,14 @@ import quizora.database.databaseConnection;
 import quizora.model.ResultRecord;
 public final class ResultsDAO {
  public List<ResultRecord> load(AuthenticatedUser admin)throws SQLException{
-  try(var c=databaseConnection.getConnection()){
-   c.setReadOnly(true);c.setAutoCommit(false);AccountManagementDAO.requireAdmin(c,admin,false);
+  try(var c=databaseConnection.getReadOnlyConnection()){
+   c.setAutoCommit(false);AccountManagementDAO.requireAdmin(c,admin,false);
    var data=read(c);c.commit();return data;
   }
  }
  public List<ResultRecord> loadForTeacher(AuthenticatedUser teacher)throws SQLException {
-  try(var c=databaseConnection.getConnection()) {
-   c.setReadOnly(true);c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
+  try(var c=databaseConnection.getReadOnlyConnection()) {
+   c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
    QuizManagementDAO.requireTeacher(c,teacher);
    var data=readForTeacher(c,teacher.id());c.commit();return data;
   }

@@ -30,7 +30,7 @@ public class AccountManagementDAO {
             try {
                 requireAdmin(connection, admin, true);
                 try (var duplicate = connection.prepareStatement(
-                        "SELECT user_id FROM users WHERE username IN (?,?) OR email IN (?,?) FOR UPDATE")) {
+                        "SELECT user_id FROM users WHERE username IN (?,?) OR email IN (?,?)")) {
                     duplicate.setQueryTimeout(10);
                     duplicate.setString(1, details.username());
                     duplicate.setString(2, details.email());
@@ -75,8 +75,7 @@ public class AccountManagementDAO {
     }
 
     public List<AccountRecord> load(AuthenticatedUser admin) throws SQLException {
-        try (var connection = databaseConnection.getConnection()) {
-            connection.setReadOnly(true);
+        try (var connection = databaseConnection.getReadOnlyConnection()) {
             connection.setAutoCommit(false);
             requireAdmin(connection, admin, false);
             List<AccountRecord> records = new ArrayList<>();
@@ -112,7 +111,7 @@ public class AccountManagementDAO {
                 if (changes != null) {
                     try (var duplicate = connection.prepareStatement("""
                             SELECT user_id FROM users WHERE user_id<>?
-                            AND (username IN (?,?) OR email IN (?,?)) FOR UPDATE
+                            AND (username IN (?,?) OR email IN (?,?))
                             """)) {
                         duplicate.setQueryTimeout(10);
                         duplicate.setLong(1, original.id());
@@ -126,7 +125,7 @@ public class AccountManagementDAO {
                     }
                 }
                 String sql = changes == null
-                        ? "UPDATE users SET is_active=FALSE,archived_at=CURRENT_TIMESTAMP WHERE user_id=? AND role='" + role + "' AND archived_at IS NULL"
+                        ? "UPDATE users SET is_active=FALSE,archived_at=datetime('now','localtime') WHERE user_id=? AND role='" + role + "' AND archived_at IS NULL"
                         : "UPDATE users SET full_name=?,username=?,email=?,is_active=? WHERE user_id=? AND role='" + role + "' AND archived_at IS NULL";
                 try (var statement = connection.prepareStatement(sql)) {
                     statement.setQueryTimeout(10);
@@ -152,7 +151,7 @@ public class AccountManagementDAO {
     }
 
     private AccountRecord findLocked(Connection connection, long id) throws SQLException {
-        try (var statement = connection.prepareStatement(PROJECTION + "WHERE user_id=? AND role='" + role + "' FOR UPDATE")) {
+        try (var statement = connection.prepareStatement(PROJECTION + "WHERE user_id=? AND role='" + role + "'")) {
             statement.setQueryTimeout(10);
             statement.setLong(1, id);
             try (var result = statement.executeQuery()) {
@@ -165,7 +164,7 @@ public class AccountManagementDAO {
     static void requireAdmin(Connection connection, AuthenticatedUser admin, boolean lock) throws SQLException {
         if (admin == null || !"admin".equals(admin.role())) throw new SecurityException("Administrator access is required.");
         try (var statement = connection.prepareStatement("SELECT user_id FROM users "
-                + "WHERE user_id=? AND role='admin' AND is_active=TRUE AND archived_at IS NULL" + (lock ? " FOR SHARE" : ""))) {
+                + "WHERE user_id=? AND role='admin' AND is_active=TRUE AND archived_at IS NULL")) {
             statement.setQueryTimeout(10);
             statement.setLong(1, admin.id());
             try (var result = statement.executeQuery()) {

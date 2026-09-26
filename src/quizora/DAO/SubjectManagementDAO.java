@@ -27,11 +27,11 @@ public final class SubjectManagementDAO {
    c.setAutoCommit(false);try{
     AccountManagementDAO.requireAdmin(c,admin,true);long id=original==null?0:original.id();
     if(original!=null){
-     try(var s=c.prepareStatement("SELECT subject_id FROM subjects WHERE subject_id=? FOR UPDATE")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){if(!r.next())throw new SQLException("Subject no longer exists.","40001");}}
+     try(var s=c.prepareStatement("SELECT subject_id FROM subjects WHERE subject_id=?")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){if(!r.next())throw new SQLException("Subject no longer exists.","40001");}}
      var current=find(c,id);if(!current.equals(original))throw new SQLException("Subject changed. Refresh and try again.","40001");
      if(current.archived())throw new IllegalArgumentException("Archived subjects are read-only.");
     }
-    if(changes==null){try(var s=c.prepareStatement("UPDATE subjects SET archived_at=CURRENT_TIMESTAMP WHERE subject_id=?")){s.setLong(1,id);s.executeUpdate();}}
+    if(changes==null){try(var s=c.prepareStatement("UPDATE subjects SET archived_at=datetime('now','localtime') WHERE subject_id=?")){s.setLong(1,id);s.executeUpdate();}}
     else{
      String sql=id==0?"INSERT INTO subjects(subject_name,category,description) VALUES(?,?,?)":"UPDATE subjects SET subject_name=?,category=?,description=? WHERE subject_id=?";
      try(var s=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){s.setQueryTimeout(10);s.setString(1,changes.name());s.setString(2,changes.category());s.setString(3,changes.description());if(id!=0)s.setLong(4,id);s.executeUpdate();

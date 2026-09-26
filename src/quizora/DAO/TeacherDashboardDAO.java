@@ -17,8 +17,7 @@ public final class TeacherDashboardDAO {
         if (user == null || !"teacher".equals(user.role())) {
             throw new SecurityException("Teacher access is required");
         }
-        try (var connection = databaseConnection.getConnection()) {
-            connection.setReadOnly(true);
+        try (var connection = databaseConnection.getReadOnlyConnection()) {
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             connection.setAutoCommit(false);
             try (var statement = connection.prepareStatement(
@@ -53,7 +52,7 @@ public final class TeacherDashboardDAO {
                   (SELECT AVG(100.0*r.score/NULLIF(r.total_points,0)) FROM quiz_results r
                    JOIN quiz_attempts a ON a.attempt_id=r.attempt_id JOIN quizzes q ON q.quiz_id=a.quiz_id
                    WHERE q.teacher_id=? AND q.archived_at IS NULL AND a.status='submitted') AS average_score,
-                  CURRENT_DATE AS today
+                  date('now','localtime') AS today
                 """)) {
             statement.setQueryTimeout(10);
             for (int i = 1; i <= 6; i++) statement.setLong(i, teacherId);
@@ -66,7 +65,7 @@ public final class TeacherDashboardDAO {
                 submissions = result.getLong("submissions");
                 double score = result.getDouble("average_score");
                 average = result.wasNull() ? null : score;
-                today = result.getDate("today").toLocalDate();
+                today = LocalDate.parse(result.getString("today"));
             }
         }
         List<Count> bySubject = new ArrayList<>();
@@ -95,7 +94,7 @@ public final class TeacherDashboardDAO {
             statement.setDate(2, java.sql.Date.valueOf(today.minusDays(13)));
             statement.setDate(3, java.sql.Date.valueOf(today.plusDays(1)));
             try (var result = statement.executeQuery()) {
-                while (result.next()) days.put(result.getDate(1).toLocalDate(), result.getLong(2));
+                while (result.next()) days.put(LocalDate.parse(result.getString(1)), result.getLong(2));
             }
         }
         var statuses = new LinkedHashMap<String, Long>();

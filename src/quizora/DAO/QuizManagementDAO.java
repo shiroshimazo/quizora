@@ -40,7 +40,7 @@ public final class QuizManagementDAO {
     }
     static void requireTeacher(Connection c,AuthenticatedUser teacher)throws SQLException {
         if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
-        try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL FOR SHARE")) {
+        try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL")) {
             s.setQueryTimeout(10);s.setLong(1,teacher.id());
             try(var r=s.executeQuery()){if(!r.next())throw new SecurityException("Active teacher access is required.");}
         }
@@ -85,7 +85,7 @@ public final class QuizManagementDAO {
             try{
                 if(teacherCreation){
                     requireTeacher(c,admin);
-                    try(var s=c.prepareStatement("SELECT ts.subject_id FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND ts.subject_id=? AND s.archived_at IS NULL FOR SHARE")) {
+                    try(var s=c.prepareStatement("SELECT ts.subject_id FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND ts.subject_id=? AND s.archived_at IS NULL")) {
                         s.setQueryTimeout(10);s.setLong(1,admin.id());s.setLong(2,change.subjectId());
                         try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("This subject is no longer assigned to you or has been archived. Refresh subjects and try again.");}
                     }
@@ -99,16 +99,16 @@ public final class QuizManagementDAO {
                     if(current.attempts()>0 && (!items.equals(original.questions())||change.minutes()!=current.minutes()||change.subjectId()!=current.subjectId()||change.teacherId()!=current.teacherId()||change.state().equals("draft")))
                         throw new IllegalArgumentException("Quizzes with attempts retain their questions, time limit, subject and teacher, and cannot return to draft.");
                 }
-                try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL FOR SHARE")){
+                try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL")){
                     s.setLong(1,change.teacherId());try(var r=s.executeQuery()){
                         if(!r.next()&&(current==null||current.teacherId()!=change.teacherId()))throw new IllegalArgumentException("Select an active teacher.");
                     }
                 }
-                try(var s=c.prepareStatement("SELECT subject_id,archived_at FROM subjects WHERE subject_id=? FOR SHARE")){
+                try(var s=c.prepareStatement("SELECT subject_id,archived_at FROM subjects WHERE subject_id=?")){
                     s.setLong(1,change.subjectId());try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("Subject no longer exists. Refresh and try again.");
                     if(r.getTimestamp("archived_at")!=null&&(current==null||current.subjectId()!=change.subjectId()))throw new IllegalArgumentException("Select an active subject.");}
                 }
-                String sql=id==0?"INSERT INTO quizzes(title,description,subject_id,teacher_id,time_limit_minutes,status) VALUES(?,?,?,?,?,?)":"UPDATE quizzes SET title=?,description=?,subject_id=?,teacher_id=?,time_limit_minutes=?,status=?,updated_at=CURRENT_TIMESTAMP WHERE quiz_id=?";
+                String sql=id==0?"INSERT INTO quizzes(title,description,subject_id,teacher_id,time_limit_minutes,status) VALUES(?,?,?,?,?,?)":"UPDATE quizzes SET title=?,description=?,subject_id=?,teacher_id=?,time_limit_minutes=?,status=?,updated_at=datetime('now','localtime') WHERE quiz_id=?";
                 try(var s=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){
                     s.setQueryTimeout(10);s.setString(1,change.title());s.setString(2,change.description());s.setLong(3,change.subjectId());s.setLong(4,change.teacherId());s.setInt(5,change.minutes());s.setString(6,change.state());
                     if(id!=0)s.setLong(7,id);s.executeUpdate();
@@ -130,13 +130,13 @@ public final class QuizManagementDAO {
                 AccountManagementDAO.requireAdmin(c,admin,true);lock(c,original.id());var current=find(c,original.id());
                 if(!current.equals(original))throw new SQLException("Quiz changed. Refresh and try again.","40001");
                 if(current.archived())throw new IllegalArgumentException("Quiz is already archived.");
-                try(var s=c.prepareStatement("UPDATE quizzes SET status='closed',archived_at=CURRENT_TIMESTAMP WHERE quiz_id=?")){s.setLong(1,original.id());s.executeUpdate();}
+                try(var s=c.prepareStatement("UPDATE quizzes SET status='closed',archived_at=datetime('now','localtime') WHERE quiz_id=?")){s.setLong(1,original.id());s.executeUpdate();}
                 var result=find(c,original.id());c.commit();return result;
             }catch(SQLException|RuntimeException e){c.rollback();throw e;}
         }
     }
     private void lock(Connection c,long id)throws SQLException{
-        try(var s=c.prepareStatement("SELECT quiz_id FROM quizzes WHERE quiz_id=? FOR UPDATE")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){if(!r.next())throw new SQLException("Quiz no longer exists.","40001");}}
+        try(var s=c.prepareStatement("SELECT quiz_id FROM quizzes WHERE quiz_id=?")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){if(!r.next())throw new SQLException("Quiz no longer exists.","40001");}}
     }
     private QuizRecord read(ResultSet r)throws SQLException{
         return new QuizRecord(r.getLong("quiz_id"),r.getLong("subject_id"),r.getString("subject_name"),r.getLong("teacher_id"),r.getString("full_name"),r.getString("title"),Objects.requireNonNullElse(r.getString("description"),""),r.getInt("time_limit_minutes"),r.getString("status"),r.getTimestamp("archived_at")!=null,r.getInt("question_count"),r.getLong("points"),r.getInt("attempts"),r.getTimestamp("updated_at").toLocalDateTime());

@@ -17,8 +17,7 @@ public final class AdminDashboardDAO {
         if (user == null || !"admin".equals(user.role())) {
             throw new SecurityException("Administrator access is required");
         }
-        try (var connection = databaseConnection.getConnection()) {
-            connection.setReadOnly(true);
+        try (var connection = databaseConnection.getReadOnlyConnection()) {
             connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             connection.setAutoCommit(false);
             try (var statement = connection.prepareStatement(
@@ -50,7 +49,7 @@ public final class AdminDashboardDAO {
                   (SELECT AVG(100.0*r.score/r.total_points) FROM quiz_results r
                    JOIN quiz_attempts a ON a.attempt_id=r.attempt_id
                    WHERE a.status='submitted') AS average_score,
-                  CURRENT_DATE AS today
+                  date('now','localtime') AS today
                 """)) {
             statement.setQueryTimeout(10);
             try (var result = statement.executeQuery()) {
@@ -62,7 +61,7 @@ public final class AdminDashboardDAO {
                 submissions = result.getLong("submissions");
                 double score = result.getDouble("average_score");
                 average = result.wasNull() ? null : score;
-                today = result.getDate("today").toLocalDate();
+                today = LocalDate.parse(result.getString("today"));
             }
         }
         List<Count> bySubject = new ArrayList<>();
@@ -88,7 +87,7 @@ public final class AdminDashboardDAO {
             statement.setDate(1, java.sql.Date.valueOf(today.minusDays(13)));
             statement.setDate(2, java.sql.Date.valueOf(today.plusDays(1)));
             try (var result = statement.executeQuery()) {
-                while (result.next()) days.put(result.getDate(1).toLocalDate(), result.getLong(2));
+                while (result.next()) days.put(LocalDate.parse(result.getString(1)), result.getLong(2));
             }
         }
         var statuses = new LinkedHashMap<String, Long>();

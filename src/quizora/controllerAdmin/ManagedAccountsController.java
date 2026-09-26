@@ -313,7 +313,7 @@ public class ManagedAccountsController implements Initializable {
         if (error instanceof SecurityException) return "Administrator access is required. Sign in again.";
         if (error instanceof IllegalArgumentException) return error.getMessage();
         if (error instanceof SQLException sql) {
-            if (sql.getErrorCode() == 1062) return "That username or email is already in use.";
+            if (quizora.database.databaseConnection.isDuplicateKey(sql)) return "That username or email is already in use.";
             if ("40001".equals(sql.getSQLState())) return "This record changed. Close the form, refresh, and try again.";
         }
         return "Unable to complete the request. Check the database connection and try again.";

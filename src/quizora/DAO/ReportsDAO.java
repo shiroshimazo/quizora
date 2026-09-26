@@ -8,8 +8,7 @@ import quizora.model.ReportData;
 public final class ReportsDAO {
     public ReportData load(AuthenticatedUser admin, int threshold) throws SQLException {
         if (threshold < 0 || threshold > 100) throw new IllegalArgumentException("Passing score must be between 0 and 100.");
-        try (var c = databaseConnection.getConnection()) {
-            c.setReadOnly(true);
+        try (var c = databaseConnection.getReadOnlyConnection()) {
             c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             c.setAutoCommit(false);
             AccountManagementDAO.requireAdmin(c, admin, false);
@@ -24,7 +23,7 @@ public final class ReportsDAO {
         long quizzes, published, archived, attempts, submitted;
         java.time.LocalDateTime generated;
         try (var s = c.prepareStatement("""
-                SELECT CURRENT_TIMESTAMP,
+                SELECT datetime('now','localtime'),
                 (SELECT COUNT(*) FROM quizzes),
                 (SELECT COUNT(*) FROM quizzes WHERE status='published' AND archived_at IS NULL),
                 (SELECT COUNT(*) FROM quizzes WHERE archived_at IS NOT NULL),
