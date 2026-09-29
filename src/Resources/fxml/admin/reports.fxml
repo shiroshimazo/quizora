@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quizora.controllerAdmin.reportsController"
@@ -10,7 +11,7 @@
     <Label text="Reports" styleClass="overview-title"/>
     <Label text="View and export all-time quiz, student and teacher statistics." wrapText="true" styleClass="overview-muted"/>
    </VBox>
-   <Button fx:id="refreshReportsButton" text="Refresh" onAction="#refresh" accessibleText="Refresh reports" styleClass="refresh-button"/>
+   <Button fx:id="refreshReportsButton" text="Refresh" onAction="#refresh" accessibleText="Refresh reports" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="refresh"/></graphic></Button>
   </HBox>
   <GridPane fx:id="reportsKpiGrid" hgap="18" vgap="18" minWidth="0">
    <VBox spacing="10" styleClass="kpi-card"><Label text="Total quizzes" styleClass="kpi-title"/><Label fx:id="reportQuizzesValue" text="?" styleClass="kpi-value"/></VBox>
@@ -21,7 +22,7 @@
    <FlowPane hgap="16" vgap="12">
     <VBox spacing="6"><Label text="Report type" labelFor="$reportType"/><ComboBox fx:id="reportType" prefWidth="220" accessibleText="Report type" styleClass="management-input"/></VBox>
     <VBox spacing="6"><Label text="Passing score (%)" labelFor="$passThreshold"/><Spinner fx:id="passThreshold" prefWidth="140" accessibleText="Passing score percentage" styleClass="management-input"/></VBox>
-    <Button fx:id="exportReportButton" text="Export PDF" onAction="#exportPdf" accessibleText="Export displayed report as PDF" styleClass="refresh-button"/>
+    <Button fx:id="exportReportButton" text="Export PDF" onAction="#exportPdf" accessibleText="Export displayed report as PDF" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="download-01"/></graphic></Button>
    </FlowPane>
    <Label fx:id="reportsMessage" text="Select Reports to generate statistics." wrapText="true" styleClass="overview-muted"/>
    <Label fx:id="reportHeading" text="Quiz statistics" styleClass="chart-heading"/>

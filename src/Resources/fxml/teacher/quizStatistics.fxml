@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.*?>
@@ -11,8 +12,8 @@
   <Label text="Compare quiz performance and participation across your quizzes, including archived history." wrapText="true" styleClass="overview-muted"/>
   <FlowPane hgap="14" vgap="12">
    <VBox spacing="6"><Label text="Quiz" labelFor="$quizFilter"/><ComboBox fx:id="quizFilter" prefWidth="270" accessibleText="Select a quiz for statistics" promptText="All quizzes" styleClass="management-input"/></VBox>
-   <Button fx:id="allQuizzesButton" text="All quizzes" accessibleText="Show statistics for all your quizzes" onAction="#allQuizzes" styleClass="row-action"/>
-   <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh your quiz statistics" onAction="#refresh" styleClass="refresh-button"/>
+   <Button fx:id="allQuizzesButton" text="All quizzes" accessibleText="Show statistics for all your quizzes" onAction="#allQuizzes" styleClass="row-action" graphicTextGap="8"><graphic><HugeIcon name="quiz-01"/></graphic></Button>
+   <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh your quiz statistics" onAction="#refresh" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="refresh"/></graphic></Button>
   </FlowPane>
   <Label fx:id="statusLabel" text="Open Quiz Statistics to load your data." wrapText="true" styleClass="overview-muted"/>
   <GridPane fx:id="kpiGrid" hgap="18" vgap="18" minWidth="0">

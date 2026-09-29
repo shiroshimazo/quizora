@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -14,7 +15,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.SVGPath?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/26.0.2"
@@ -49,13 +49,12 @@
                         <Label text="Username or email *" styleClass="field-label" />
                     </HBox>
                     <StackPane styleClass="field-input">
-                        <!-- UIcons/user_male.svg path rendered inside the text field. -->
                         <TextField fx:id="usernameField" promptText="Username or email"
                                    accessibleText="Username or email"
                                    minHeight="40.0" prefHeight="40.0" maxHeight="40.0"
                                    styleClass="login-field login-field-with-icon"
                                    style="-fx-padding: 0px 12px 0px 34px;" />
-                        <SVGPath content="m7.5.5c1.65685425 0 3 1.34314575 3 3v2c0 1.65685425-1.34314575 3-3 3s-3-1.34314575-3-3v-2c0-1.65685425 1.34314575-3 3-3zm7 14v-.7281753c0-3.1864098-3.6862915-5.2718247-7-5.2718247s-7 2.0854149-7 5.2718247v.7281753c0 .5522847.44771525 1 1 1h12c.5522847 0 1-.4477153 1-1z" translateX="9.0" translateY="0.0" styleClass="field-icon" mouseTransparent="true" StackPane.alignment="CENTER_LEFT" />
+                        <HugeIcon name="user" translateX="9" StackPane.alignment="CENTER_LEFT" style="-fx-fill: #64748b;"/>
                     </StackPane>
                 </VBox>
 
@@ -65,7 +64,6 @@
                         <Label text="Password *" styleClass="field-label" />
                     </HBox>
                     <StackPane styleClass="field-input">
-                        <!-- UIcons/lock.svg path rendered inside the text field. -->
                         <PasswordField fx:id="passwordField" promptText="Password"
                                        accessibleText="Password"
                                        minHeight="40.0" prefHeight="40.0" maxHeight="40.0"
@@ -74,8 +72,8 @@
                         <TextField fx:id="visiblePasswordField" promptText="Password"
                                    accessibleText="Visible password" visible="false" managed="false"
                                    minHeight="40" prefHeight="40" maxHeight="40"
-                                   styleClass="login-field" />
-                        <SVGPath content="m2.5 8.5-.00586729-1.99475098c-.00728549-4.00349935 1.32800361-6.00524902 4.00586729-6.00524902s4.0112203 2.00174967 4.0000699 6.00524902v1.99475098m-8.0000699 0h8.0225317c1.0543618 0 1.9181652.81587779 1.9945143 1.8507377l.0054778.1548972-.0169048 6c-.0031058 1.1023652-.8976224 1.9943651-1.999992 1.9943651h-8.005627c-1.1045695 0-2-.8954305-2-2v-6c0-1.1045695.8954305-2 2-2z" translateX="7.0" translateY="0.0" scaleX="0.82" scaleY="0.82" styleClass="field-icon" mouseTransparent="true" StackPane.alignment="CENTER_LEFT" />
+                                   styleClass="login-field" style="-fx-padding: 0px 12px 0px 34px;" />
+                        <HugeIcon name="lock-password" translateX="9" StackPane.alignment="CENTER_LEFT" style="-fx-fill: #64748b;"/>
                     </StackPane>
                 </VBox>
 
@@ -85,11 +83,11 @@
                               accessibleText="Show password" styleClass="show-password" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Hyperlink fx:id="forgotPasswordLink" text="Forgot password?"
-                               accessibleText="Forgot password" styleClass="text-link" />
+                               accessibleText="Forgot password" styleClass="text-link" graphicTextGap="8"><graphic><HugeIcon name="lock-password"/></graphic></Hyperlink>
                 </HBox>
 
                 <Button fx:id="loginButton" text="Login" mnemonicParsing="false" onAction="#login"
-                        defaultButton="true" accessibleText="Login" styleClass="login-button">
+                        defaultButton="true" accessibleText="Login" styleClass="login-button" graphicTextGap="8"><graphic><HugeIcon name="login-01"/></graphic>
                     <VBox.margin><Insets top="18.0" /></VBox.margin>
                 </Button>
 
@@ -100,7 +98,7 @@
                     <VBox.margin><Insets top="5.0" /></VBox.margin>
                     <Label text="New to Quizora?" styleClass="footer-label" />
                     <Hyperlink fx:id="createAccountLink" text="Create an account"
-                               accessibleText="Create an account" styleClass="text-link" />
+                               accessibleText="Create an account" styleClass="text-link" graphicTextGap="8"><graphic><HugeIcon name="user-add-01"/></graphic></Hyperlink>
                 </HBox>
             </VBox>
         </StackPane>

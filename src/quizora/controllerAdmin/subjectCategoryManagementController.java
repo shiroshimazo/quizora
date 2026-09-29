@@ -1,3 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+/**
+ *
+ * @author Jeremy
+ */
+
 package quizora.controllerAdmin;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -36,7 +46,7 @@ public class subjectCategoryManagementController {
   SortedList<SubjectRecord> sorted=new SortedList<>(filtered);sorted.comparatorProperty().bind(subjectTable.comparatorProperty());subjectTable.setItems(sorted);
   subjectScroll.viewportBoundsProperty().addListener((o,a,b)->reflow(b.getWidth()));reflow(900);filter();
  }
- private Button button(String text,Runnable action){Button b=new Button(text);b.getStyleClass().add("row-action");b.setOnAction(e->action.run());return b;}
+ private Button button(String text,Runnable action){Button b=new Button(text);b.getStyleClass().add("row-action");quizora.ui.HugeIcon.attach(b,switch(text){case "View" -> "view";case "Edit" -> "edit-02";case "Archive" -> "archive-01";default -> "add-01";});b.setOnAction(e->action.run());return b;}
  private <T> void column(String title,int width,java.util.function.Function<SubjectRecord,T> value){var c=new TableColumn<SubjectRecord,T>(title);c.setMinWidth(width);c.setCellValueFactory(q->new ReadOnlyObjectWrapper<>(value.apply(q.getValue())));c.setCellFactory(col->new TableCell<>(){protected void updateItem(T item,boolean empty){super.updateItem(item,empty);setText(empty||item==null?null:item.toString());setTooltip(empty||item==null?null:new Tooltip(item.toString()));}});subjectTable.getColumns().add(c);}
  private void reflow(double width){int count=width<650?1:3;subjectKpiGrid.getColumnConstraints().clear();for(int i=0;i<count;i++){var c=new ColumnConstraints();c.setPercentWidth(100.0/count);c.setMinWidth(0);subjectKpiGrid.getColumnConstraints().add(c);}for(int i=0;i<3;i++){GridPane.setColumnIndex(subjectKpiGrid.getChildren().get(i),i%count);GridPane.setRowIndex(subjectKpiGrid.getChildren().get(i),i/count);}}
  private void filter(){filtered.setPredicate(q->q.matches(subjectSearch.getText(),subjectStatusFilter.getValue(),subjectCategoryFilter.getValue()));subjectResultCount.setText(filtered.size()+" of "+records.size()+" subjects shown");subjectTable.setPlaceholder(new Label(!loaded?"Refresh to load subjects.":records.isEmpty()?"No subjects yet. Add your first subject.":"No subjects match your filters."));}

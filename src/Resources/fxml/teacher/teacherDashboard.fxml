@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
@@ -13,16 +14,16 @@
             </VBox>
             <Label text="WORKSPACE" styleClass="navigation-caption"/>
             <VBox spacing="5">
-                <ToggleButton fx:id="dashboardButton" text="Dashboard" accessibleText="Dashboard" toggleGroup="$navigationGroup" selected="true" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="createQuizButton" text="Create Quiz" accessibleText="Create Quiz" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="assignedSubjectsButton" text="Assigned Subjects" accessibleText="Assigned Subjects" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="studentResultsButton" text="Student Results" accessibleText="Student Results" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="quizStatisticsButton" text="Quiz Statistics" accessibleText="Quiz Statistics" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="profileButton" text="Profile" accessibleText="Profile" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="dashboardButton" text="Dashboard" accessibleText="Dashboard" toggleGroup="$navigationGroup" selected="true" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="dashboard-square-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="createQuizButton" text="Create Quiz" accessibleText="Create Quiz" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="add-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="assignedSubjectsButton" text="Assigned Subjects" accessibleText="Assigned Subjects" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="book-open-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="studentResultsButton" text="Student Results" accessibleText="Student Results" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="award-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="quizStatisticsButton" text="Quiz Statistics" accessibleText="Quiz Statistics" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="analytics-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="profileButton" text="Profile" accessibleText="Profile" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="user-circle"/></graphic></ToggleButton>
             </VBox>
             <Region VBox.vgrow="ALWAYS"/>
             <VBox styleClass="sidebar-footer">
-                <Button fx:id="logoutButton" text="Logout" accessibleText="Log out and return to login" onAction="#logout" maxWidth="Infinity" styleClass="logout-button"/>
+                <Button fx:id="logoutButton" text="Logout" accessibleText="Log out and return to login" onAction="#logout" maxWidth="Infinity" styleClass="logout-button" graphicTextGap="8"><graphic><HugeIcon name="logout-01"/></graphic></Button>
             </VBox>
         </VBox>
     </left>

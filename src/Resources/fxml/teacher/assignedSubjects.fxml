@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
@@ -17,7 +18,7 @@
             <Label text="Your subjects" styleClass="chart-heading"/>
             <FlowPane hgap="14" vgap="10">
                 <VBox spacing="6"><Label text="Search subjects" labelFor="$subjectSearch"/><TextField fx:id="subjectSearch" prefWidth="240" promptText="Name, category or description" accessibleText="Search assigned subjects" styleClass="management-input"/></VBox>
-                <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh assigned subjects" onAction="#refresh" styleClass="refresh-button"/>
+                <Button fx:id="refreshButton" text="Refresh" accessibleText="Refresh assigned subjects" onAction="#refresh" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="refresh"/></graphic></Button>
             </FlowPane>
             <Label fx:id="statusLabel" text="Open Assigned Subjects to load your assignments." wrapText="true" styleClass="overview-muted"/>
             <TableView fx:id="subjectTable" accessibleText="Your assigned subjects and quiz counts" minWidth="0" minHeight="240" prefHeight="340" VBox.vgrow="ALWAYS" styleClass="student-table"/>

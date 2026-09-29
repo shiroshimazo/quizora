@@ -1,6 +1,11 @@
+.root, .label, .text-input, .button, .toggle-button, .check-box,
+.radio-button, .hyperlink, .combo-box-base, .list-cell, .table-cell {
+    -fx-font-family: "Satoshi Variable SemiBold";
+}
+
 .dashboard-shell {
     -fx-background-color: #F7FAFC;
-    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 14px;
     -fx-text-fill: #253238;
 }
@@ -18,7 +23,7 @@
 }
 .role-label { -fx-font-size: 13px; -fx-text-fill: #68777D; }
 .navigation-caption {
-    -fx-font-family: "Satoshi Variable Medium";
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 11px;
     -fx-text-fill: #68777D;
     -fx-padding: 0 12 12 12;
@@ -38,7 +43,7 @@
 .navigation-button:hover, .logout-button:hover { -fx-background-color: #EDF4F8; }
 .navigation-button:selected {
     -fx-background-color: #A8DADC;
-    -fx-font-family: "Satoshi Variable Medium";
+    -fx-font-family: "Satoshi Variable SemiBold";
 }
 .navigation-button:pressed, .logout-button:pressed { -fx-background-color: #82C4C7; }
 .navigation-button:focused, .logout-button:focused { -fx-border-color: #39777B; }
@@ -64,12 +69,12 @@
     -fx-border-color: #DCE5E8; -fx-border-radius: 14;
     -fx-padding: 24;
 }
-.kpi-title { -fx-font-family: "Satoshi Variable Medium"; -fx-text-fill: #68777D; -fx-font-size: 15; }
+.kpi-title { -fx-font-family: "Satoshi Variable SemiBold"; -fx-text-fill: #68777D; -fx-font-size: 15; }
 .kpi-value { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 40; -fx-text-fill: #253238; }
 .chart-heading { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 20; -fx-text-fill: #253238; }
 .refresh-button {
     -fx-background-color: #A8DADC; -fx-background-radius: 8; -fx-padding: 12 20;
-    -fx-text-fill: #253238; -fx-font-family: "Satoshi Variable Medium"; -fx-min-height: 44;
+    -fx-text-fill: #253238; -fx-font-family: "Satoshi Variable SemiBold"; -fx-min-height: 44;
     -fx-border-color: transparent; -fx-border-width: 2; -fx-border-radius: 8; -fx-cursor: hand;
 }
 .refresh-button:hover { -fx-background-color: #82C4C7; }
@@ -98,7 +103,7 @@
 }
 .management-input:focused { -fx-border-color: #39777B; }
 .student-editor { -fx-padding: 20; }
-.student-edit-dialog { -fx-font-family: "Satoshi Variable Regular"; -fx-font-size: 14; }
+.student-edit-dialog { -fx-font-family: "Satoshi Variable SemiBold"; -fx-font-size: 14; }
 .management-error { -fx-text-fill: #923B3B; -fx-font-size: 13; }
 .student-table { -fx-background-color: white; -fx-border-color: #DCE5E8; -fx-padding: 0; }
 .student-table .column-header-background, .student-table .column-header,
@@ -106,7 +111,7 @@
 .student-table .column-header { -fx-size: 44; -fx-border-color: transparent; }
 .student-table .column-header .label {
     -fx-alignment: CENTER_LEFT; -fx-padding: 0 10;
-    -fx-font-family: "Satoshi Variable Medium"; -fx-text-fill: #253238;
+    -fx-font-family: "Satoshi Variable SemiBold"; -fx-text-fill: #253238;
 }
 .student-table .table-row-cell { -fx-cell-size: 60; -fx-background-color: white; }
 .student-table .table-row-cell:odd { -fx-background-color: #F7FAFC; }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
@@ -13,18 +14,18 @@
             </VBox>
             <Label text="WORKSPACE" styleClass="navigation-caption"/>
             <VBox spacing="5">
-                <ToggleButton fx:id="dashboardButton" text="Dashboard" accessibleText="Dashboard" toggleGroup="$navigationGroup" selected="true" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="studentManagementButton" text="Student Management" accessibleText="Student Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="teacherManagementButton" text="Teacher Management" accessibleText="Teacher Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="quizManagementButton" text="Quiz Management" accessibleText="Quiz Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="subjectCategoryManagementButton" text="Subject/Category Management" accessibleText="Subject/Category Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="reportsButton" text="Reports" accessibleText="Reports" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="resultsButton" text="Results" accessibleText="Results" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
-                <ToggleButton fx:id="accountManagementButton" text="Account Management" accessibleText="Account Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button"/>
+                <ToggleButton fx:id="dashboardButton" text="Dashboard" accessibleText="Dashboard" toggleGroup="$navigationGroup" selected="true" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="dashboard-square-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="studentManagementButton" text="Student Management" accessibleText="Student Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="user-group"/></graphic></ToggleButton>
+                <ToggleButton fx:id="teacherManagementButton" text="Teacher Management" accessibleText="Teacher Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="teacher"/></graphic></ToggleButton>
+                <ToggleButton fx:id="quizManagementButton" text="Quiz Management" accessibleText="Quiz Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="quiz-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="subjectCategoryManagementButton" text="Subject/Category Management" accessibleText="Subject/Category Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="book-open-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="reportsButton" text="Reports" accessibleText="Reports" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="chart-histogram"/></graphic></ToggleButton>
+                <ToggleButton fx:id="resultsButton" text="Results" accessibleText="Results" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="award-01"/></graphic></ToggleButton>
+                <ToggleButton fx:id="accountManagementButton" text="Account Management" accessibleText="Account Management" toggleGroup="$navigationGroup" selected="false" onAction="#navigate" maxWidth="Infinity" wrapText="true" styleClass="navigation-button" graphicTextGap="8"><graphic><HugeIcon name="user-settings-01"/></graphic></ToggleButton>
             </VBox>
             <Region VBox.vgrow="ALWAYS"/>
             <VBox styleClass="sidebar-footer">
-                <Button fx:id="logoutButton" text="Logout" accessibleText="Log out and return to login" onAction="#logout" maxWidth="Infinity" styleClass="logout-button"/>
+                <Button fx:id="logoutButton" text="Logout" accessibleText="Log out and return to login" onAction="#logout" maxWidth="Infinity" styleClass="logout-button" graphicTextGap="8"><graphic><HugeIcon name="logout-01"/></graphic></Button>
             </VBox>
         </VBox>
     </left>

@@ -1,3 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+/**
+ *
+ * @author Jeremy
+ */
+
 package quizora.controllerAdmin;
 
 import java.util.*;
@@ -26,7 +36,7 @@ public final class QuizEditor extends ScrollPane {
         subject.setMaxWidth(Double.MAX_VALUE);teacher.setMaxWidth(Double.MAX_VALUE);status.setMaxWidth(Double.MAX_VALUE);description.setPrefRowCount(2);description.setWrapText(true);
         field(content,"Title *",title);field(content,"Description",description);field(content,"Subject *",subject);if(!teacherCreation)field(content,"Teacher *",teacher);else teacher.setValue(data.teachers().getFirst());field(content,"Time limit (minutes) *",minutes);if(!teacherCreation)field(content,"Status *",status);
         var heading=new Label("Questions");heading.getStyleClass().add("chart-heading");content.getChildren().addAll(heading,questions);
-        Button add=new Button("Add question");add.setId("addQuestionButton");add.getStyleClass().add("row-action");add.setOnAction(e->add(null));content.getChildren().add(add);
+        Button add=new Button("Add question");quizora.ui.HugeIcon.attach(add,"add-01");add.setId("addQuestionButton");add.getStyleClass().add("row-action");add.setOnAction(e->add(null));content.getChildren().add(add);
         if(original!=null){var q=original.quiz();title.setText(q.title());description.setText(q.description());minutes.setText(""+q.minutes());status.setValue(q.state());
             subject.setValue(choice(subject,q.subjectId(),q.subject()));teacher.setValue(choice(teacher,q.teacherId(),q.teacher()));original.questions().forEach(this::add);
             if(q.attempts()>0){subject.setDisable(true);teacher.setDisable(true);minutes.setDisable(true);questions.setDisable(true);add.setDisable(true);status.getItems().remove("draft");
@@ -51,7 +61,7 @@ public final class QuizEditor extends ScrollPane {
             id=q==null?0:q.id();setSpacing(8);getStyleClass().add("chart-card");text.setPrefRowCount(2);text.setWrapText(true);
             text.setId("questionTextField");a.setId("optionAField");b.setId("optionBField");c.setId("optionCField");d.setId("optionDField");answer.setId("correctAnswerField");points.setId("questionPointsField");
             field(this,"Question *",text);field(this,"Option A *",a);field(this,"Option B *",b);field(this,"Option C *",c);field(this,"Option D *",d);answer.getItems().setAll("A","B","C","D");field(this,"Correct answer *",answer);field(this,"Points *",points);
-            Button remove=new Button("Remove question");remove.getStyleClass().add("row-action");remove.setOnAction(e->{forms.remove(this);questions.getChildren().remove(this);});getChildren().add(remove);
+            Button remove=new Button("Remove question");quizora.ui.HugeIcon.attach(remove,"delete-02");remove.getStyleClass().add("row-action");remove.setOnAction(e->{forms.remove(this);questions.getChildren().remove(this);});getChildren().add(remove);
             if(q!=null){text.setText(q.text());a.setText(q.a());b.setText(q.b());c.setText(q.c());d.setText(q.d());answer.setValue(q.answer());points.setText(""+q.points());}
         }
         QuizQuestion value(){int value;try{value=Integer.parseInt(points.getText().strip());}catch(NumberFormatException e){throw new IllegalArgumentException("Enter whole-number points for each question.");}return new QuizQuestion(id,text.getText(),a.getText(),b.getText(),c.getText(),d.getText(),answer.getValue(),value);}

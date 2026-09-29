@@ -26,3 +26,6 @@ and choose Run Project (F6).
 
 Keep `src/Resources/fonts`, `src/Resources/icons`, and `src/Resources/images` in
 the project: the login screen and dashboards require these bundled assets.
+
+Interaction icons use the bundled Hugeicons Stroke Rounded font, loaded directly
+by JavaFX without a network connection. See [icon dependency details](src/Resources/icons/hugeicons/README.md).

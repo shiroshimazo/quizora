@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import quizora.ui.HugeIcon?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.chart.*?>
@@ -13,7 +14,7 @@
                     <Label text="Teacher dashboard" styleClass="overview-title" wrapText="true"/>
                     <Label text="Your quizzes, student participation, and assessment activity at a glance." styleClass="overview-muted" wrapText="true"/>
                 </VBox>
-                <Button fx:id="refreshButton" text="Refresh data" accessibleText="Refresh teacher dashboard" onAction="#refresh" styleClass="refresh-button"/>
+                <Button fx:id="refreshButton" text="Refresh data" accessibleText="Refresh teacher dashboard" onAction="#refresh" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="refresh"/></graphic></Button>
             </HBox>
             <Label fx:id="statusLabel" text="Loading teaching overview..." wrapText="true" styleClass="overview-muted"/>
             <GridPane fx:id="kpiGrid" hgap="18" vgap="18" minWidth="0">

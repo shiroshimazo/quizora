@@ -1,3 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+/**
+ *
+ * @author Jeremy
+ */
+
 package quizora.controllerAdmin;
 
 import java.util.*;
@@ -38,7 +48,7 @@ public class quizManagementController {
         SortedList<QuizRecord> sorted=new SortedList<>(filtered);sorted.comparatorProperty().bind(quizTable.comparatorProperty());quizTable.setItems(sorted);
         quizScroll.viewportBoundsProperty().addListener((o,a,b)->reflow(b.getWidth()));reflow(900);filter();controls();
     }
-    private Button button(String title,Runnable action){Button b=new Button(title);b.getStyleClass().add("row-action");b.setOnAction(e->action.run());return b;}
+    private Button button(String title,Runnable action){Button b=new Button(title);b.getStyleClass().add("row-action");quizora.ui.HugeIcon.attach(b,switch(title){case "View" -> "view";case "Edit" -> "edit-02";case "Archive" -> "archive-01";default -> "add-01";});b.setOnAction(e->action.run());return b;}
     private <T> void column(String title,int width,java.util.function.Function<QuizRecord,T> value){TableColumn<QuizRecord,T> c=new TableColumn<>(title);c.setMinWidth(width);c.setCellValueFactory(q->new ReadOnlyObjectWrapper<>(value.apply(q.getValue())));quizTable.getColumns().add(c);}
     private void reflow(double width){int count=width<650?1:3;quizKpiGrid.getColumnConstraints().clear();for(int i=0;i<count;i++){var c=new ColumnConstraints();c.setPercentWidth(100.0/count);c.setMinWidth(0);quizKpiGrid.getColumnConstraints().add(c);}for(int i=0;i<3;i++){GridPane.setColumnIndex(quizKpiGrid.getChildren().get(i),i%count);GridPane.setRowIndex(quizKpiGrid.getChildren().get(i),i/count);}}
     private void filter(){filtered.setPredicate(q->q.matches(quizSearch.getText(),quizStatusFilter.getValue()));quizResultCount.setText(filtered.size()+" of "+records.size()+" quizzes shown");quizTable.setPlaceholder(new Label(data==null?"Refresh to load quizzes.":records.isEmpty()?"No quizzes yet. Add your first quiz.":"No quizzes match your filters."));}

@@ -1,6 +1,11 @@
+.root, .label, .text-input, .button, .toggle-button, .check-box,
+.radio-button, .hyperlink, .combo-box-base, .list-cell, .table-cell {
+    -fx-font-family: "Satoshi Variable SemiBold";
+}
+
 .login-page {
     -fx-background-color: #F7FAFC;
-    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-smoothing-type: lcd;
 }
 
@@ -28,14 +33,12 @@
     -fx-text-fill: #253238;
     -fx-font-family: "Satoshi Variable Bold";
     -fx-font-size: 28px;
-    -fx-font-weight: 600;
 }
 
 .login-subtitle {
-    -fx-text-fill: #8A979C;
-    -fx-font-family: "Satoshi Variable Semibold";
+    -fx-text-fill: #56666D;
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
 }
 
 .field-label-row {
@@ -61,9 +64,8 @@
 
 .field-label {
     -fx-text-fill: #425157;
-    -fx-font-family: "Satoshi Variable Semibold";
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 14px;
-    -fx-font-weight: 500;
 }
 
 .login-field {
@@ -77,10 +79,9 @@
     -fx-border-radius: 5px;
     -fx-padding: 0px 12px 0px 12px;
     -fx-text-fill: #253238;
-    -fx-font-family: "Satoshi Variable Light";
-    -fx-prompt-text-fill: #A9B2B5;
+    -fx-font-family: "Satoshi Variable SemiBold";
+    -fx-prompt-text-fill: #65757C;
     -fx-font-size: 12px;
-    -fx-font-weight: 300;
 }
 
 .login-field-with-icon {
@@ -103,10 +104,9 @@
 }
 
 .show-password {
-    -fx-text-fill: #8A979C;
-    -fx-font-family: "Satoshi Variable Light";
+    -fx-text-fill: #56666D;
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 11px;
-    -fx-font-weight: 300;
 }
 
 .show-password .box {
@@ -136,10 +136,9 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-padding: 2px 0 2px 0;
-    -fx-text-fill: #67969D;
-    -fx-font-family: "Satoshi Variable Regular";
+    -fx-text-fill: #3F7C84;
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 11px;
-    -fx-font-weight: 400;
     -fx-underline: false;
     -fx-cursor: hand;
 }
@@ -167,9 +166,8 @@
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
     -fx-text-fill: #253238;
-    -fx-font-family: "Satoshi Variable Regular";
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 12px;
-    -fx-font-weight: 400;
     -fx-cursor: hand;
 }
 
@@ -189,10 +187,9 @@
 }
 
 .footer-label {
-    -fx-text-fill: #8A979C;
-    -fx-font-family: "Satoshi Variable Light";
+    -fx-text-fill: #56666D;
+    -fx-font-family: "Satoshi Variable SemiBold";
     -fx-font-size: 11px;
-    -fx-font-weight: 300;
 }
 
 .login-status {
