@@ -26,7 +26,7 @@ public class loginController implements Initializable {
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private TextField visiblePasswordField;
-    @FXML private CheckBox showPasswordCheckBox;
+    @FXML private ToggleButton showPasswordButton;
     @FXML private Button loginButton;
     @FXML private Label loginStatusLabel;
     private boolean busy;
@@ -34,10 +34,24 @@ public class loginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         visiblePasswordField.textProperty().bindBidirectional(passwordField.textProperty());
-        visiblePasswordField.visibleProperty().bind(showPasswordCheckBox.selectedProperty());
+        visiblePasswordField.visibleProperty().bind(showPasswordButton.selectedProperty());
         visiblePasswordField.managedProperty().bind(visiblePasswordField.visibleProperty());
-        passwordField.visibleProperty().bind(showPasswordCheckBox.selectedProperty().not());
+        passwordField.visibleProperty().bind(showPasswordButton.selectedProperty().not());
         passwordField.managedProperty().bind(passwordField.visibleProperty());
+        Tooltip visibilityHint = new Tooltip("Show password");
+        showPasswordButton.setTooltip(visibilityHint);
+        quizora.ui.HugeIcon.attach(showPasswordButton, "view-off");
+        showPasswordButton.selectedProperty().addListener((observable, previous, shown) -> {
+            TextField source = shown ? passwordField : visiblePasswordField;
+            TextField target = passwordInput();
+            int anchor = source.getAnchor();
+            int caret = source.getCaretPosition();
+            quizora.ui.HugeIcon.attach(showPasswordButton, shown ? "view" : "view-off");
+            visibilityHint.setText(shown ? "Hide password" : "Show password");
+            showPasswordButton.setAccessibleText(visibilityHint.getText());
+            target.requestFocus();
+            target.selectRange(anchor, caret);
+        });
     }
 
     @FXML
@@ -91,8 +105,22 @@ public class loginController implements Initializable {
         worker.start();
     }
 
+    @FXML
+    private void forgotPassword() {
+        if (busy) return;
+        try {
+            javafx.scene.Parent recovery = javafx.fxml.FXMLLoader.load(getClass().getResource(
+                    "/Resources/fxml/authentication/forgotPassword.fxml"));
+            passwordField.clear();
+            loginButton.getScene().setRoot(recovery);
+            ((Stage) recovery.getScene().getWindow()).setTitle("Quizora - Forgot password");
+        } catch (java.io.IOException failure) {
+            loginStatusLabel.setText("Unable to open password recovery. Please try again.");
+        }
+    }
+
     private TextField passwordInput() {
-        return showPasswordCheckBox.isSelected() ? visiblePasswordField : passwordField;
+        return showPasswordButton.isSelected() ? visiblePasswordField : passwordField;
     }
 
     private void setBusy(boolean value) {
@@ -101,7 +129,7 @@ public class loginController implements Initializable {
         usernameField.setDisable(value);
         passwordField.setDisable(value);
         visiblePasswordField.setDisable(value);
-        showPasswordCheckBox.setDisable(value);
+        showPasswordButton.setDisable(value);
         loginButton.setText(value ? "Signing in..." : "Login");
     }
 }

@@ -201,3 +201,49 @@
 #visiblePasswordField {
     -fx-padding: 0px 12px 0px 34px;
 }
+
+/* Centered password recovery, using the shared authentication palette. */
+.recovery-card {
+    -fx-padding: 18 32;
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-color: #E1E9EB;
+    -fx-border-radius: 14;
+}
+.recovery-brand { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 16; -fx-text-fill: #39777B; }
+.recovery-step { -fx-font-size: 12; -fx-text-fill: #56666D; -fx-padding: 6 9; -fx-background-radius: 6; }
+.recovery-current { -fx-background-color: #A8DADC; -fx-text-fill: #253238; }
+.recovery-complete { -fx-background-color: #EDF6F6; -fx-text-fill: #39777B; }
+.recovery-title { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 24; -fx-text-fill: #253238; }
+.recovery-description { -fx-font-size: 13; -fx-text-fill: #56666D; }
+.recovery-code { -fx-font-size: 20; }
+.recovery-status { -fx-font-size: 12; -fx-text-fill: #923B3B; }
+.recovery-primary {
+    -fx-background-color: #A8DADC; -fx-background-radius: 6;
+    -fx-text-fill: #253238; -fx-font-size: 14; -fx-min-height: 40;
+    -fx-border-color: transparent; -fx-border-width: 2; -fx-border-radius: 6; -fx-cursor: hand;
+}
+.recovery-primary:hover { -fx-background-color: #82C4C7; }
+.recovery-primary:pressed { -fx-background-color: #72B9BD; }
+.recovery-primary:focused { -fx-border-color: #39777B; }
+
+.recovery-password { -fx-padding: 0 46 0 12; }
+.password-eye {
+    -fx-min-width: 40; -fx-pref-width: 40; -fx-max-width: 40;
+    -fx-min-height: 40; -fx-pref-height: 40; -fx-max-height: 40;
+    -fx-padding: 0; -fx-background-color: transparent; -fx-background-radius: 5;
+    -fx-border-color: transparent; -fx-border-width: 0;
+    -fx-text-fill: #56666D; -fx-cursor: hand;
+}
+.password-eye:hover { -fx-background-color: transparent; -fx-text-fill: #253238; }
+.password-eye:selected { -fx-text-fill: #39777B; }
+.password-eye:focused { -fx-text-fill: #253238; }
+
+.recovery-timing { -fx-padding: 6 10; -fx-background-color: #F0F5F6; -fx-background-radius: 6; }
+.recovery-countdown { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 14; -fx-text-fill: #253238; }
+.recovery-resend {
+    -fx-background-color: transparent; -fx-text-fill: #39777B; -fx-min-height: 32;
+    -fx-border-color: #A8DADC; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand;
+}
+.recovery-resend:hover { -fx-background-color: #EDF6F6; }
+.recovery-resend:focused { -fx-border-color: #39777B; }

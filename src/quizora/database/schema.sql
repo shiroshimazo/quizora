@@ -130,3 +130,15 @@ FOR EACH ROW WHEN NEW.updated_at IS OLD.updated_at
 BEGIN
     UPDATE quizzes SET updated_at = datetime('now', 'localtime') WHERE quiz_id = NEW.quiz_id;
 END;
+
+-- One current recovery challenge per account; plaintext codes are never stored.
+CREATE TABLE IF NOT EXISTS password_recovery (
+    user_id INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    challenge_id TEXT NOT NULL UNIQUE,
+    code_hash BLOB NOT NULL,
+    requested_at INTEGER NOT NULL,
+    sent_at INTEGER,
+    expires_at INTEGER,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    verified INTEGER NOT NULL DEFAULT 0
+);

@@ -29,3 +29,6 @@ the project: the login screen and dashboards require these bundled assets.
 
 Interaction icons use the bundled Hugeicons Stroke Rounded font, loaded directly
 by JavaFX without a network connection. See [icon dependency details](src/Resources/icons/hugeicons/README.md).
+
+Password recovery uses Gmail SMTP. See [SMTP setup](SMTP_SETUP.md) for local
+credentials, expiry behavior, and automated recovery checks.
