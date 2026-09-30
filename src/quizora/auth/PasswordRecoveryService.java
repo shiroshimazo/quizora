@@ -56,6 +56,11 @@ public final class PasswordRecoveryService {
         Instant sentAt;
         try {
             sentAt = sender.send(pending.email(), pending.code()).truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
+        } catch (RecoveryException failure) {
+            throw failure;
+        } catch (jakarta.mail.AuthenticationFailedException failure) {
+            throw new RecoveryException(Reason.DELIVERY,
+                    "Gmail rejected the sender credentials. Check the Gmail address and app password in smtp.local.properties.", failure);
         } catch (Exception failure) {
             throw new RecoveryException(Reason.DELIVERY,
                     "We couldn't send your email. Please try again shortly or contact support.", failure);

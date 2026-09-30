@@ -16,13 +16,23 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
-/** Gmail delivery using mandatory STARTTLS and credentials supplied by the environment. */
+/** Gmail delivery using mandatory STARTTLS and private local settings or environment credentials. */
 public final class GmailCodeSender implements PasswordRecoveryService.CodeSender {
     @Override public java.time.Instant send(String recipient, String code) throws Exception {
-        String username = System.getenv("quizoraservices@gmail.com");
-        String password = System.getenv("yshygqozivgujcik");
+        Properties local = new Properties();
+        var localFile = java.nio.file.Path.of("smtp.local.properties");
+        if (java.nio.file.Files.exists(localFile)) {
+            try (var reader = java.nio.file.Files.newBufferedReader(localFile, java.nio.charset.StandardCharsets.UTF_8)) {
+                local.load(reader);
+            }
+        }
+        String username = local.getProperty("smtp.username", "").strip();
+        String password = local.getProperty("smtp.appPassword", "").strip();
+        if (username.isBlank()) username = System.getenv("QUIZORA_SMTP_USERNAME");
+        if (password.isBlank()) password = System.getenv("QUIZORA_SMTP_APP_PASSWORD");
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new IllegalStateException("Gmail SMTP credentials are not configured");
+            throw new PasswordRecoveryService.RecoveryException(PasswordRecoveryService.Reason.DELIVERY,
+                    "Email sending is not configured. Fill in smtp.local.properties in the project folder.");
         }
         Properties properties = new Properties();
         properties.setProperty("mail.smtp.host", "smtp.gmail.com");

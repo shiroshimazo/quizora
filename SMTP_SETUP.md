@@ -5,7 +5,22 @@ mandatory STARTTLS and certificate hostname verification. The subject is
 `Your Verification Code`; the plain-text body includes the six-digit code and
 states that it expires in five minutes.
 
-## Local configuration
+## NetBeans setup (recommended)
+
+1. Open the **Files** tab in NetBeans (Ctrl+2).
+2. Expand the `quizora` project and open `smtp.local.properties` beside `README.md`.
+3. Set `smtp.username` to the sending Gmail address and `smtp.appPassword` to a
+   new Google app password. Enter values after `=` without quotation marks.
+4. Save the file and run the project (F6). If the app is already open, retry after
+   the resend cooldown; settings are read again for each send.
+
+The file is ignored by Git and is outside `src`, so Ant does not bundle it in the
+application JAR. Do not share this file. Nonblank local settings override the
+corresponding environment variables. Keep the project's working directory at
+its root (the NetBeans default). A packaged app looks for the file in its working
+directory. No Windows environment-variable dialog is needed.
+
+## Environment configuration (alternative)
 
 Enable Google 2-Step Verification and create a Gmail app password. Do not use
 your normal Google account password. Some managed accounts do not allow app
