@@ -97,7 +97,7 @@
                 <HBox alignment="CENTER" spacing="18.0" styleClass="create-account-row">
                     <VBox.margin><Insets top="5.0" /></VBox.margin>
                     <Label text="New to Quizora?" styleClass="footer-label" />
-                    <Hyperlink fx:id="createAccountLink" text="Create an account"
+                    <Hyperlink fx:id="createAccountLink" text="Create an account" onAction="#createAccount"
                                accessibleText="Create an account" styleClass="text-link" graphicTextGap="8"><graphic><HugeIcon name="user-add-01"/></graphic></Hyperlink>
                 </HBox>
             </VBox>

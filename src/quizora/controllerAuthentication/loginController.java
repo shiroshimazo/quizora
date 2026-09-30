@@ -119,6 +119,21 @@ public class loginController implements Initializable {
         }
     }
 
+    @FXML
+    private void createAccount() {
+        if (busy) return;
+        try {
+            javafx.scene.Parent registration = javafx.fxml.FXMLLoader.load(getClass().getResource(
+                    "/Resources/fxml/authentication/register.fxml"));
+            passwordField.clear();
+            loginButton.getScene().setRoot(registration);
+            ((Stage) registration.getScene().getWindow()).setTitle("Quizora - Create Account");
+            registration.lookup("#fullNameField").requestFocus();
+        } catch (java.io.IOException failure) {
+            loginStatusLabel.setText("Unable to open registration. Please try again.");
+        }
+    }
+
     private TextField passwordInput() {
         return showPasswordButton.isSelected() ? visiblePasswordField : passwordField;
     }

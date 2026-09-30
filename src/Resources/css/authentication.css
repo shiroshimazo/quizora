@@ -9,6 +9,21 @@
     -fx-font-smoothing-type: lcd;
 }
 
+.registration-page {
+    -fx-background-color: #F5FAFC;
+}
+
+.registration-form {
+    -fx-padding: 20 33 24 33;
+    -fx-background-color: #F5FAFC;
+}
+
+.registration-form .registration-button {
+    -fx-min-width: 0;
+    -fx-pref-width: 434;
+    -fx-max-width: infinity;
+}
+
 .branding-panel {
     -fx-background-color: #F7FAFC;
 }

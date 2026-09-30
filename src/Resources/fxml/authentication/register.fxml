@@ -1,1 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/26.0.2" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="quizora.controllerAuthentication.registerController"
+      prefWidth="1000" prefHeight="500" minWidth="1000" minHeight="500"
+      stylesheets="@../../css/authentication.css" styleClass="registration-page">
+    <VBox prefWidth="500" minWidth="500" maxWidth="500" styleClass="registration-form">
+        <Label text="Create your account" styleClass="login-title" />
+        <Label text="Join Quizora and start learning smarter." styleClass="login-subtitle">
+            <VBox.margin><Insets top="2" /></VBox.margin>
+        </Label>
+
+        <HBox spacing="16">
+            <VBox.margin><Insets top="14" /></VBox.margin>
+            <VBox spacing="6" prefWidth="209" HBox.hgrow="ALWAYS">
+                <Label text="Full name *" labelFor="${fullNameField}" styleClass="field-label" />
+                <TextField fx:id="fullNameField" promptText="e.g. Alex Rivera"
+                           accessibleText="Full name, required" styleClass="login-field" />
+            </VBox>
+            <VBox spacing="6" prefWidth="209" HBox.hgrow="ALWAYS">
+                <Label text="Username *" labelFor="${usernameField}" styleClass="field-label" />
+                <TextField fx:id="usernameField" promptText="e.g. alex.rivera"
+                           accessibleText="Username, required" styleClass="login-field" />
+            </VBox>
+        </HBox>
+
+        <VBox spacing="6">
+            <VBox.margin><Insets top="20" /></VBox.margin>
+            <Label text="Email address *" labelFor="${emailField}" styleClass="field-label" />
+            <TextField fx:id="emailField" promptText="name@example.com"
+                       accessibleText="Email address, required" styleClass="login-field" />
+        </VBox>
+
+        <HBox spacing="16">
+            <VBox.margin><Insets top="20" /></VBox.margin>
+            <VBox spacing="6" prefWidth="209" HBox.hgrow="ALWAYS">
+                <Label text="Password *" labelFor="${passwordField}" styleClass="field-label" />
+                <PasswordField fx:id="passwordField" promptText="At least 8 characters"
+                               accessibleText="Password, required" styleClass="login-field" />
+            </VBox>
+            <VBox spacing="6" prefWidth="209" HBox.hgrow="ALWAYS">
+                <Label text="Confirm password *" labelFor="${confirmPasswordField}" styleClass="field-label" />
+                <PasswordField fx:id="confirmPasswordField" promptText="Re-enter your password"
+                               accessibleText="Confirm password, required" styleClass="login-field" />
+            </VBox>
+        </HBox>
+
+        <CheckBox fx:id="showPasswordsCheckBox" text="Show passwords" styleClass="show-password"
+                  mnemonicParsing="false" minHeight="32">
+            <VBox.margin><Insets top="16" /></VBox.margin>
+        </CheckBox>
+        <Button fx:id="createAccountButton" text="Create account" mnemonicParsing="false"
+                maxWidth="Infinity" styleClass="login-button registration-button">
+            <VBox.margin><Insets top="10" /></VBox.margin>
+        </Button>
+        <HBox alignment="CENTER" spacing="30">
+            <VBox.margin><Insets top="24" /></VBox.margin>
+            <Label text="Already have an account?" styleClass="footer-label" />
+            <Hyperlink fx:id="signInLink" text="Sign in" onAction="#backToLogin" minHeight="40" styleClass="text-link" />
+        </HBox>
+    </VBox>
+
+    <StackPane prefWidth="500" minWidth="500" maxWidth="500" styleClass="branding-panel">
+        <ImageView fitWidth="500" fitHeight="500" preserveRatio="true" smooth="true"
+                   mouseTransparent="true">
+            <image><Image url="@../../images/panelImage.png" /></image>
+        </ImageView>
+    </StackPane>
+</HBox>
