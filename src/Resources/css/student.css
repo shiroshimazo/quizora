@@ -1,1 +1,9 @@
-
+.quiz-timer { -fx-font-family: "Satoshi Variable Bold"; -fx-font-size: 24; -fx-text-fill: #39777B; }
+.quiz-answer {
+    -fx-padding: 14; -fx-min-height: 48; -fx-background-color: #F7FAFC;
+    -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #DCE5E8;
+    -fx-text-fill: #253238; -fx-cursor: hand;
+}
+.quiz-answer:hover { -fx-background-color: #EDF4F8; }
+.quiz-answer:selected { -fx-background-color: #D8EEEE; -fx-border-color: #39777B; }
+.quiz-answer:focused { -fx-border-color: #39777B; -fx-border-width: 2; -fx-padding: 13; }

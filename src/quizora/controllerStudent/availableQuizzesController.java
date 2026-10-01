@@ -16,6 +16,17 @@ public class availableQuizzesController {
     @FXML private TableView<Quiz> quizTable;
     @FXML private Label statusLabel, countLabel, detailTitle, detailMeta, detailDescription;
     @FXML private Button refreshButton;
+    @FXML private Button takeSelectedButton;
+    private java.util.function.LongConsumer takeQuizHandler;
+
+    public void setTakeQuizHandler(java.util.function.LongConsumer handler) {
+        takeQuizHandler = handler;
+        details(quizTable.getSelectionModel().getSelectedItem());
+    }
+    @FXML private void takeSelected() {
+        Quiz quiz = quizTable.getSelectionModel().getSelectedItem();
+        if (quiz != null && takeQuizHandler != null) takeQuizHandler.accept(quiz.id());
+    }
     private List<Quiz> quizzes = List.of();
     private boolean loading;
     private static final String ALL = "All subjects";
@@ -111,6 +122,7 @@ public class availableQuizzesController {
         quizTable.setPlaceholder(new Label(quizzes.isEmpty() ? "No published quizzes are available yet." : "No quizzes match your filters."));
     }
     private void details(Quiz quiz) {
+        takeSelectedButton.setDisable(quiz == null || takeQuizHandler == null);
         detailTitle.setText(quiz == null ? "Select a quiz" : quiz.title());
         detailMeta.setText(quiz == null ? "Quiz details appear here." : quiz.subject() + " | " + quiz.teacher()
                 + "\n" + quiz.questions() + " questions | " + quiz.minutes() + " minutes | " + quiz.points()

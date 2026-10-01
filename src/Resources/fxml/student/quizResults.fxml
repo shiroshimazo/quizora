@@ -1,1 +1,36 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import quizora.ui.HugeIcon?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerStudent.quizResultsController" fitToWidth="true" styleClass="overview-scroll">
+    <VBox spacing="20" styleClass="admin-overview">
+        <Label text="YOUR LEARNING HISTORY" styleClass="overview-eyebrow"/>
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Quiz results" styleClass="overview-title" wrapText="true"/>
+                <Label text="Review your submitted attempts and track your scores." styleClass="overview-muted" wrapText="true"/>
+            </VBox>
+            <Button fx:id="refreshButton" text="Refresh" onAction="#refresh" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="refresh"/></graphic></Button>
+        </HBox>
+        <FlowPane hgap="16" vgap="16">
+            <VBox spacing="8" styleClass="kpi-card" prefWidth="205"><Label text="Submissions" styleClass="kpi-title"/><Label fx:id="totalLabel" text="0" styleClass="kpi-value"/></VBox>
+            <VBox spacing="8" styleClass="kpi-card" prefWidth="205"><Label text="Average score" styleClass="kpi-title"/><Label fx:id="averageLabel" text="--" styleClass="kpi-value"/></VBox>
+            <VBox spacing="8" styleClass="kpi-card" prefWidth="205"><Label text="Best score" styleClass="kpi-title"/><Label fx:id="bestLabel" text="--" styleClass="kpi-value"/></VBox>
+        </FlowPane>
+        <FlowPane hgap="12" vgap="12">
+            <VBox spacing="6"><Label text="Search" labelFor="${searchField}"/><TextField fx:id="searchField" promptText="Quiz, subject, or attempt ID" prefWidth="240" styleClass="management-input"/></VBox>
+            <VBox spacing="6"><Label text="Subject" labelFor="${subjectFilter}"/><ComboBox fx:id="subjectFilter" promptText="All subjects" prefWidth="190" styleClass="management-input"/></VBox>
+            <VBox spacing="6"><Label text="From" labelFor="${fromDate}"/><DatePicker fx:id="fromDate" editable="false" prefWidth="155" styleClass="management-input"/></VBox>
+            <VBox spacing="6"><Label text="To" labelFor="${toDate}"/><DatePicker fx:id="toDate" editable="false" prefWidth="155" styleClass="management-input"/></VBox>
+        </FlowPane>
+        <Button fx:id="clearButton" text="Clear filters" onAction="#clearFilters" styleClass="row-action"/>
+        <Label fx:id="statusLabel" text="Open Quiz Results to load your submissions." wrapText="true" styleClass="overview-muted"/>
+        <Label fx:id="countLabel" text="0 results" styleClass="overview-muted"/>
+        <TableView fx:id="resultsTable" prefHeight="370" minHeight="220" styleClass="student-table" accessibleText="Your submitted quiz results"/>
+        <VBox spacing="10" styleClass="chart-card">
+            <Label fx:id="detailTitle" text="Select a result" styleClass="chart-heading" wrapText="true"/>
+            <Label fx:id="detailLabel" text="Submission details appear here." wrapText="true" styleClass="overview-muted"/>
+        </VBox>
+    </VBox>
+</ScrollPane>

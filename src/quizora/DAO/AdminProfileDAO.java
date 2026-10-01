@@ -18,11 +18,14 @@ import quizora.database.databaseConnection;
 import quizora.model.*;
 
 public class AdminProfileDAO {
+    private final userDAO.Connections connections;
+    public AdminProfileDAO() { this(databaseConnection::getConnection); }
+    protected AdminProfileDAO(userDAO.Connections connections) { this.connections = connections; }
     protected void requireAccess(Connection c, AuthenticatedUser identity, boolean lock)throws SQLException {
         AccountManagementDAO.requireAdmin(c,identity,lock);
     }
     public AdminProfile load(AuthenticatedUser admin) throws SQLException {
-        try (var c = databaseConnection.getReadOnlyConnection()) {
+        try (var c = connections.open()) {
             c.setAutoCommit(false);
             requireAccess(c, admin, false);
             var profile = read(c, admin.id(), false); c.commit(); return profile;
@@ -36,7 +39,7 @@ public class AdminProfileDAO {
     }
     private AdminProfile change(AuthenticatedUser admin, AdminProfile original, ProfileChanges changes, byte[] picture) throws SQLException {
         if (admin == null || original == null || admin.id() != original.id()) throw new SecurityException("Only your own profile can be updated.");
-        try (var c = databaseConnection.getConnection()) {
+        try (var c = connections.open()) {
             c.setAutoCommit(false);
             try {
                 requireAccess(c, admin, true);
@@ -45,7 +48,7 @@ public class AdminProfileDAO {
                 if (changes != null) {
                     try (var s = c.prepareStatement("SELECT user_id FROM users WHERE user_id<>? AND (username IN (?,?) OR email IN (?,?))")) {
                         s.setQueryTimeout(10); s.setLong(1, admin.id()); s.setString(2, changes.username()); s.setString(3, changes.email()); s.setString(4, changes.username()); s.setString(5, changes.email());
-                        try (var r = s.executeQuery()) { if (r.next()) throw new SQLException("Username or email already in use.", "23000", 1062); }
+                        try (var r = s.executeQuery()) { if (r.next()) throw new IllegalArgumentException("That username or email is already in use."); }
                     }
                 }
                 try (var s = c.prepareStatement(changes == null ? "UPDATE users SET profile_picture=? WHERE user_id=?" : "UPDATE users SET full_name=?,username=?,email=?,contact_number=? WHERE user_id=?")) {

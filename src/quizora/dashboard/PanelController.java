@@ -34,6 +34,12 @@ public class PanelController implements Initializable {
     @FXML private javafx.scene.Node dashboardContent;
     @FXML private javafx.scene.Node availableQuizzesContent;
     @FXML private quizora.controllerStudent.availableQuizzesController availableQuizzesContentController;
+    @FXML private javafx.scene.Node takeQuizContent;
+    @FXML private quizora.controllerStudent.takeQuizController takeQuizContentController;
+    @FXML private ToggleButton takeQuizButton;
+    @FXML private javafx.scene.Node studentQuizResultsContent, studentProfileContent;
+    @FXML private quizora.controllerStudent.quizResultsController studentQuizResultsContentController;
+    @FXML private quizora.controllerStudent.profileController studentProfileContentController;
     @FXML private javafx.scene.Node teacherProfileContent;
     @FXML private quizora.controllerTeacher.profileController teacherProfileContentController;
     @FXML private javafx.scene.Node quizStatisticsContent;
@@ -65,6 +71,12 @@ public class PanelController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (availableQuizzesContentController != null && takeQuizContentController != null) {
+            availableQuizzesContentController.setTakeQuizHandler(quizId -> {
+                takeQuizContentController.selectQuiz(quizId);
+                navigate(new ActionEvent(takeQuizButton,takeQuizButton));
+            });
+        }
         navigationGroup.selectedToggleProperty().addListener((observable, previous, selected) -> {
             if (selected == null && previous != null) {
                 previous.setSelected(true);
@@ -77,6 +89,24 @@ public class PanelController implements Initializable {
         ToggleButton destination = (ToggleButton) event.getSource();
         destination.setSelected(true);
         workspacePane.setAccessibleText(destination.getText() + " workspace");
+        if (studentQuizResultsContent != null) {
+            boolean results = "quizResultsButton".equals(destination.getId());
+            studentQuizResultsContent.setVisible(results);
+            studentQuizResultsContent.setManaged(results);
+            if (results) studentQuizResultsContentController.refresh();
+        }
+        if (studentProfileContent != null) {
+            boolean profile = "profileButton".equals(destination.getId());
+            studentProfileContent.setVisible(profile);
+            studentProfileContent.setManaged(profile);
+            if (profile) studentProfileContentController.refresh();
+        }
+        if (takeQuizContent != null) {
+            boolean taking = "takeQuizButton".equals(destination.getId());
+            takeQuizContent.setVisible(taking);
+            takeQuizContent.setManaged(taking);
+            if (taking) takeQuizContentController.open();
+        }
         if (availableQuizzesContent != null) {
             boolean available = "availableQuizzesButton".equals(destination.getId());
             availableQuizzesContent.setVisible(available);

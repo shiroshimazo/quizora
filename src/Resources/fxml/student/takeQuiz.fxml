@@ -1,1 +1,51 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import quizora.ui.HugeIcon?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerStudent.takeQuizController" fx:id="takeQuizScroll"
+    fitToWidth="true" styleClass="overview-scroll" stylesheets="@../../css/student.css">
+    <VBox spacing="20" styleClass="admin-overview">
+        <Label text="TEST YOUR KNOWLEDGE" styleClass="overview-eyebrow"/>
+        <Label text="Take a quiz" styleClass="overview-title" wrapText="true"/>
+        <Label fx:id="statusLabel" text="Choose a quiz to begin or resume an attempt." wrapText="true" styleClass="overview-muted"/>
+        <VBox fx:id="selectionPane" spacing="16" styleClass="chart-card">
+            <Label text="Choose your quiz" styleClass="chart-heading"/>
+            <Label text="Quiz" labelFor="${quizPicker}"/>
+            <ComboBox fx:id="quizPicker" maxWidth="Infinity" styleClass="management-input" promptText="Select an available quiz"/>
+            <Label fx:id="selectionInfo" wrapText="true" styleClass="overview-muted"/>
+            <Label text="Answers save after each selection. The timer continues if you leave this panel or close the app. Unanswered questions score zero." wrapText="true" styleClass="overview-muted"/>
+            <FlowPane hgap="12" vgap="12">
+                <Button fx:id="startButton" text="Start quiz" onAction="#start" disable="true" styleClass="refresh-button" graphicTextGap="8"><graphic><HugeIcon name="play"/></graphic></Button>
+                <Button fx:id="refreshButton" text="Refresh quizzes" onAction="#open" styleClass="row-action"/>
+            </FlowPane>
+        </VBox>
+        <VBox fx:id="attemptPane" spacing="18" visible="false" managed="false">
+            <VBox spacing="12" styleClass="chart-card">
+                <Label fx:id="quizTitle" styleClass="chart-heading" wrapText="true"/>
+                <Label fx:id="timerLabel" text="Time remaining" styleClass="quiz-timer"/>
+                <Label fx:id="progressLabel" styleClass="overview-muted"/>
+                <ProgressBar fx:id="answerProgress" maxWidth="Infinity" progress="0"/>
+                <Label text="Jump to question" labelFor="${questionPicker}"/>
+                <ComboBox fx:id="questionPicker" maxWidth="Infinity" styleClass="management-input"/>
+            </VBox>
+            <VBox fx:id="questionPane" spacing="16" styleClass="chart-card">
+                <Label fx:id="questionNumber" styleClass="overview-eyebrow"/>
+                <Label fx:id="questionText" styleClass="chart-heading" wrapText="true"/>
+                <VBox fx:id="answersPane" spacing="10"/>
+                <Button fx:id="clearButton" text="Clear answer" onAction="#clearAnswer" styleClass="row-action"/>
+                <FlowPane hgap="12" vgap="12">
+                    <Button fx:id="previousButton" text="Previous" onAction="#previous" styleClass="row-action"/>
+                    <Button fx:id="nextButton" text="Next" onAction="#next" styleClass="row-action"/>
+                </FlowPane>
+            </VBox>
+            <Button fx:id="submitButton" text="Submit quiz" onAction="#confirmSubmit" styleClass="refresh-button"/>
+        </VBox>
+        <VBox fx:id="resultPane" spacing="16" visible="false" managed="false" styleClass="chart-card">
+            <Label text="Quiz submitted" styleClass="chart-heading"/>
+            <Label fx:id="scoreLabel" styleClass="kpi-value" wrapText="true"/>
+            <Label fx:id="resultLabel" wrapText="true" styleClass="overview-muted"/>
+            <Button fx:id="anotherButton" text="Choose another quiz" onAction="#another" styleClass="refresh-button"/>
+        </VBox>
+    </VBox>
+</ScrollPane>

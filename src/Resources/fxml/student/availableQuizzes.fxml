@@ -43,6 +43,7 @@
             <Label fx:id="detailTitle" text="Select a quiz" styleClass="chart-heading" wrapText="true"/>
             <Label fx:id="detailMeta" text="Quiz details appear here." styleClass="overview-muted" wrapText="true"/>
             <Label fx:id="detailDescription" wrapText="true"/>
+            <Button fx:id="takeSelectedButton" text="Take this quiz" onAction="#takeSelected" disable="true" styleClass="refresh-button"/>
         </VBox>
     </VBox>
 </ScrollPane>
