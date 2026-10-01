@@ -20,4 +20,4 @@
 
 - [ ] Configure QUIZORA_SMTP_USERNAME and QUIZORA_SMTP_APP_PASSWORD locally; see SMTP_SETUP.md.
 - [ ] Verify live Gmail delivery to an authorized test account after credentials are configured.
-- [ ] Connect the account-not-found dialog's Sign up button when the registration screen exists.
+- [x] Connect the account-not-found dialog's Sign up button to registration, preserving the entered email.

@@ -229,8 +229,7 @@ public class forgotPasswordController {
                     ButtonType signUp = new ButtonType("Sign up", ButtonBar.ButtonData.OK_DONE);
                     Alert alert = dialog(Alert.AlertType.CONFIRMATION, "Account not found", message);
                     alert.getButtonTypes().setAll(signUp, ButtonType.CANCEL);
-                    alert.showAndWait().filter(signUp::equals).ifPresent(choice ->
-                            recoveryStatus.setText("Sign-up is not available yet. Please contact your administrator."));
+                    alert.showAndWait().filter(signUp::equals).ifPresent(choice -> openRegistration());
                     return;
                 }
                 case INCORRECT -> {
@@ -244,6 +243,21 @@ public class forgotPasswordController {
         }
         recoveryStatus.setText(message);
         updateCountdown();
+    }
+
+    private void openRegistration() {
+        try {
+            Parent registration = FXMLLoader.load(getClass().getResource("/Resources/fxml/authentication/register.fxml"));
+            ((TextField) registration.lookup("#emailField")).setText(emailField.getText().strip());
+            countdown.stop();
+            ticket = null;
+            codeField.clear(); newPasswordField.clear(); confirmPasswordField.clear();
+            emailField.getScene().setRoot(registration);
+            ((Stage) registration.getScene().getWindow()).setTitle("Quizora - Create Account");
+            registration.lookup("#fullNameField").requestFocus();
+        } catch (IOException failure) {
+            recoveryStatus.setText("Unable to open registration. Please try again.");
+        }
     }
 
     private Alert dialog(Alert.AlertType type, String title, String message) {

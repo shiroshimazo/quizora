@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -33,6 +36,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import quizora.DAO.AccountManagementDAO;
 import quizora.DAO.StudentManagementDAO;
 import quizora.DAO.TeacherManagementDAO;
@@ -319,6 +323,81 @@ public class ManagedAccountsController implements Initializable {
                 error -> studentMessage.setText(errorMessage(error)));
     }
 
+    /** Teachers only see assigned subjects in Create Quiz, so the administrator grants them here. */
+    private void assignSubjects(AccountRecord teacher) {
+        if (!teachers || busy || teacher == null || teacher.archived()) return;
+        TeacherManagementDAO teacherDao = (TeacherManagementDAO) dao;
+        var identity = UserSession.current();
+        studentMessage.setText("Loading subjects...");
+        execute(() -> teacherDao.subjects(identity, teacher), subjects -> {
+            studentMessage.setText("Choose the subjects " + teacher.name() + " can create quizzes for.");
+            showAssignments(teacherDao, teacher, subjects);
+        }, error -> studentMessage.setText(errorMessage(error)));
+    }
+
+    private void showAssignments(TeacherManagementDAO teacherDao, AccountRecord teacher,
+            List<TeacherManagementDAO.AssignableSubject> subjects) {
+        List<CheckBox> boxes = new ArrayList<>();
+        VBox choices = new VBox(8);
+        for (var subject : subjects) {
+            CheckBox box = new CheckBox(subject.category().isBlank() ? subject.name() : subject.name() + " · " + subject.category());
+            box.setSelected(subject.assigned());
+            box.setUserData(subject.id());
+            box.setAccessibleText("Assign " + subject.name());
+            boxes.add(box);
+            choices.getChildren().add(box);
+        }
+        Label heading = new Label("Subjects for " + teacher.name());
+        heading.getStyleClass().add("chart-heading");
+        Label hint = new Label(subjects.isEmpty()
+                ? "There are no active subjects. Add one in Subject/Category Management first."
+                : "The teacher can create quizzes only for checked subjects. Unchecking a subject keeps the teacher's existing quizzes.");
+        hint.setWrapText(true);
+        ScrollPane list = new ScrollPane(choices);
+        list.setFitToWidth(true);
+        list.setPrefViewportHeight(240);
+        Label message = new Label();
+        message.setWrapText(true);
+        message.setId("assignSubjectsMessage");
+        message.getStyleClass().add("management-error");
+        VBox form = new VBox(12, heading, hint, list, message);
+        form.getStyleClass().add("student-editor");
+        form.setPrefWidth(440);
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Assign subjects · ID " + teacher.id());
+        dialog.initOwner(studentTable.getScene().getWindow());
+        dialog.getDialogPane().setContent(form);
+        dialog.getDialogPane().getStyleClass().add("student-edit-dialog");
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/Resources/css/dashboard.css").toExternalForm());
+        ButtonType saveType = new ButtonType("Save assignments", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().setAll(saveType, ButtonType.CANCEL);
+        Button save = (Button) dialog.getDialogPane().lookupButton(saveType);
+        Button cancel = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        save.setId("saveAssignmentsButton");
+        save.setDisable(subjects.isEmpty());
+        cancel.setId("cancelAssignmentsButton");
+        dialog.setOnCloseRequest(event -> { if (busy) event.consume(); });
+        save.addEventFilter(ActionEvent.ACTION, event -> {
+            event.consume();
+            if (busy) return;
+            Set<Long> selected = boxes.stream().filter(CheckBox::isSelected)
+                    .map(box -> (Long) box.getUserData()).collect(Collectors.toSet());
+            var identity = UserSession.current();
+            form.setDisable(true); save.setDisable(true); cancel.setDisable(true);
+            message.setText("Saving assignments...");
+            execute(() -> { teacherDao.assign(identity, teacher, selected); return selected.size(); }, count -> {
+                studentMessage.setText(teacher.name() + " now has " + count
+                        + (count == 1 ? " assigned subject." : " assigned subjects."));
+                dialog.close();
+            }, error -> {
+                form.setDisable(false); save.setDisable(false); cancel.setDisable(false);
+                message.setText(errorMessage(error));
+            });
+        });
+        dialog.showAndWait();
+    }
+
     private static String errorMessage(Throwable error) {
         if (error instanceof SecurityException) return "Administrator access is required. Sign in again.";
         if (error instanceof IllegalArgumentException) return error.getMessage();
@@ -330,7 +409,7 @@ public class ManagedAccountsController implements Initializable {
     }
 
     public final class StudentActionCell extends TableCell<AccountRecord, AccountRecord> {
-        @FXML private Button editStudentButton, archiveStudentButton;
+        @FXML private Button editStudentButton, archiveStudentButton, assignSubjectsButton;
         private final Parent actions;
 
         public StudentActionCell() {
@@ -339,6 +418,8 @@ public class ManagedAccountsController implements Initializable {
                 loader.setController(this);
                 actions = loader.load();
                 adaptLabels(actions);
+                assignSubjectsButton.setVisible(teachers);
+                assignSubjectsButton.setManaged(teachers);
             } catch (IOException error) { throw new IllegalStateException(wording("Cannot load student actions"), error); }
         }
 
@@ -350,9 +431,12 @@ public class ManagedAccountsController implements Initializable {
             archiveStudentButton.setText(student.archived() ? "Archived" : "Archive");
             editStudentButton.setAccessibleText("Edit " + student.name());
             archiveStudentButton.setAccessibleText("Archive " + student.name());
+            assignSubjectsButton.setDisable(student.archived());
+            assignSubjectsButton.setAccessibleText("Assign subjects to " + student.name());
             setGraphic(actions);
         }
         @FXML private void edit() { editStudent(getItem()); }
         @FXML private void archive() { archiveStudent(getItem()); }
+        @FXML private void assignSubjects() { ManagedAccountsController.this.assignSubjects(getItem()); }
     }
 }

@@ -65,7 +65,7 @@
                         <TableColumn fx:id="usernameColumn" text="Username" minWidth="130" prefWidth="150"/>
                         <TableColumn fx:id="emailColumn" text="Email" minWidth="200" prefWidth="240"/>
                         <TableColumn fx:id="statusColumn" text="Status" minWidth="100" prefWidth="110"/>
-                        <TableColumn fx:id="actionsColumn" text="Actions" minWidth="190" prefWidth="190" sortable="false"/>
+                        <TableColumn fx:id="actionsColumn" text="Actions" minWidth="300" prefWidth="300" sortable="false"/>
                     </columns>
                 </TableView>
                 <Label fx:id="studentResultCount" text="0 students shown" styleClass="overview-muted"/>

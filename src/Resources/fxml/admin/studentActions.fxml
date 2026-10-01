@@ -6,6 +6,8 @@
       spacing="8" alignment="CENTER_LEFT">
     <Button fx:id="editStudentButton" text="Edit" accessibleText="Edit student"
             onAction="#edit" styleClass="row-action" graphicTextGap="8"><graphic><HugeIcon name="edit-02"/></graphic></Button>
+    <Button fx:id="assignSubjectsButton" text="Subjects" accessibleText="Assign subjects"
+            onAction="#assignSubjects" visible="false" managed="false" styleClass="row-action" graphicTextGap="8"><graphic><HugeIcon name="book-open-01"/></graphic></Button>
     <Button fx:id="archiveStudentButton" text="Archive" accessibleText="Archive student"
             onAction="#archive" styleClass="row-action, archive-action" graphicTextGap="8"><graphic><HugeIcon name="archive-01"/></graphic></Button>
 </HBox>
