@@ -32,6 +32,8 @@ public class PanelController implements Initializable {
     @FXML private ToggleGroup navigationGroup;
     @FXML private StackPane workspacePane;
     @FXML private javafx.scene.Node dashboardContent;
+    @FXML private javafx.scene.Node availableQuizzesContent;
+    @FXML private quizora.controllerStudent.availableQuizzesController availableQuizzesContentController;
     @FXML private javafx.scene.Node teacherProfileContent;
     @FXML private quizora.controllerTeacher.profileController teacherProfileContentController;
     @FXML private javafx.scene.Node quizStatisticsContent;
@@ -75,6 +77,12 @@ public class PanelController implements Initializable {
         ToggleButton destination = (ToggleButton) event.getSource();
         destination.setSelected(true);
         workspacePane.setAccessibleText(destination.getText() + " workspace");
+        if (availableQuizzesContent != null) {
+            boolean available = "availableQuizzesButton".equals(destination.getId());
+            availableQuizzesContent.setVisible(available);
+            availableQuizzesContent.setManaged(available);
+            if (available) availableQuizzesContentController.refresh();
+        }
         if(teacherProfileContent != null){
             boolean profile="profileButton".equals(destination.getId());
             teacherProfileContent.setVisible(profile);teacherProfileContent.setManaged(profile);

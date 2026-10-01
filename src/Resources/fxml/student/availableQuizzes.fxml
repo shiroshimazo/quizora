@@ -1,1 +1,48 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import quizora.ui.HugeIcon?>
+<ScrollPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="quizora.controllerStudent.availableQuizzesController" fitToWidth="true" styleClass="overview-scroll">
+    <VBox spacing="20" styleClass="admin-overview">
+        <Label text="EXPLORE &amp; LEARN" styleClass="overview-eyebrow"/>
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Available quizzes" styleClass="overview-title" wrapText="true"/>
+                <Label text="Browse published quizzes and review the details before you begin." styleClass="overview-muted" wrapText="true"/>
+            </VBox>
+            <Button fx:id="refreshButton" text="Refresh" onAction="#refresh" styleClass="refresh-button" graphicTextGap="8">
+                <graphic><HugeIcon name="refresh"/></graphic>
+            </Button>
+        </HBox>
+        <FlowPane hgap="14" vgap="12">
+            <VBox spacing="6">
+                <Label text="Search quizzes" labelFor="${searchField}"/>
+                <TextField fx:id="searchField" promptText="Title, subject, or teacher" prefWidth="280" styleClass="management-input"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Subject" labelFor="${subjectFilter}"/>
+                <ComboBox fx:id="subjectFilter" prefWidth="190" styleClass="management-input"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Your progress" labelFor="${progressFilter}"/>
+                <ComboBox fx:id="progressFilter" prefWidth="190" styleClass="management-input"/>
+            </VBox>
+            <VBox spacing="6">
+                <Label text="Sort by" labelFor="${sortFilter}"/>
+                <ComboBox fx:id="sortFilter" prefWidth="180" styleClass="management-input"/>
+            </VBox>
+        </FlowPane>
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Label fx:id="countLabel" text="0 quizzes" styleClass="overview-muted" HBox.hgrow="ALWAYS"/>
+            <Button text="Clear filters" onAction="#clearFilters" styleClass="row-action"/>
+        </HBox>
+        <Label fx:id="statusLabel" wrapText="true" styleClass="overview-muted"/>
+        <TableView fx:id="quizTable" prefHeight="390" minHeight="220" styleClass="student-table" accessibleText="Available quizzes"/>
+        <VBox spacing="10" styleClass="chart-card">
+            <Label fx:id="detailTitle" text="Select a quiz" styleClass="chart-heading" wrapText="true"/>
+            <Label fx:id="detailMeta" text="Quiz details appear here." styleClass="overview-muted" wrapText="true"/>
+            <Label fx:id="detailDescription" wrapText="true"/>
+        </VBox>
+    </VBox>
+</ScrollPane>
