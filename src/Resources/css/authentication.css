@@ -18,12 +18,6 @@
     -fx-background-color: #F5FAFC;
 }
 
-.registration-form .registration-button {
-    -fx-min-width: 0;
-    -fx-pref-width: 434;
-    -fx-max-width: infinity;
-}
-
 .branding-panel {
     -fx-background-color: #F7FAFC;
 }
@@ -213,7 +207,7 @@
     -fx-padding: 6px 0;
 }
 
-#visiblePasswordField {
+.login-page #visiblePasswordField {
     -fx-padding: 0px 12px 0px 34px;
 }
 
