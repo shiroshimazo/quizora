@@ -9,37 +9,68 @@
  */
 
 package quizora.DAO;
-import java.sql.*;
-import java.util.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import quizora.auth.AuthenticatedUser;
 import quizora.database.databaseConnection;
 import quizora.model.ResultRecord;
+
+/** Scored quiz submissions: every student's for the admin, or only the teacher's own quizzes for a teacher. */
 public final class ResultsDAO {
- public List<ResultRecord> load(AuthenticatedUser admin)throws SQLException{
-  try(var c=databaseConnection.getReadOnlyConnection()){
-   c.setAutoCommit(false);AccountManagementDAO.requireAdmin(c,admin,false);
-   var data=read(c);c.commit();return data;
-  }
- }
- public List<ResultRecord> loadForTeacher(AuthenticatedUser teacher)throws SQLException {
-  try(var c=databaseConnection.getReadOnlyConnection()) {
-   c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);c.setAutoCommit(false);
-   QuizManagementDAO.requireTeacher(c,teacher);
-   var data=readForTeacher(c,teacher.id());c.commit();return data;
-  }
- }
- List<ResultRecord> read(Connection c)throws SQLException{return read(c,null);}
- List<ResultRecord> readForTeacher(Connection c,long teacherId)throws SQLException{return read(c,teacherId);}
- private List<ResultRecord> read(Connection c,Long teacherId)throws SQLException{
-  var list=new ArrayList<ResultRecord>();
-  try(var s=c.prepareStatement("""
-   SELECT a.attempt_id,u.user_id,u.full_name,u.username,q.quiz_id,q.title,s.subject_id,s.subject_name,r.score,r.total_points,a.submitted_at
-   FROM quiz_results r JOIN quiz_attempts a ON a.attempt_id=r.attempt_id
-   JOIN users u ON u.user_id=a.student_id JOIN quizzes q ON q.quiz_id=a.quiz_id
-   JOIN subjects s ON s.subject_id=q.subject_id
-   WHERE a.status='submitted' AND a.submitted_at IS NOT NULL AND r.total_points>0
-   """+(teacherId==null?"":" AND q.teacher_id=? ")+" ORDER BY a.submitted_at DESC,a.attempt_id DESC")){s.setQueryTimeout(15);if(teacherId!=null)s.setLong(1,teacherId);try(var r=s.executeQuery()){
-    while(r.next())list.add(new ResultRecord(r.getLong(1),r.getLong(2),r.getString(3),r.getString(4),r.getLong(5),r.getString(6),r.getLong(7),r.getString(8),r.getLong(9),r.getLong(10),r.getTimestamp(11).toLocalDateTime()));
-   }}return List.copyOf(list);
- }
+
+    private static final String SELECT_RESULTS = "SELECT a.attempt_id, u.user_id, u.full_name, u.username, "
+            + "q.quiz_id, q.title, s.subject_id, s.subject_name, r.score, r.total_points, a.submitted_at "
+            + "FROM quiz_results r "
+            + "JOIN quiz_attempts a ON a.attempt_id = r.attempt_id "
+            + "JOIN users u ON u.user_id = a.student_id "
+            + "JOIN quizzes q ON q.quiz_id = a.quiz_id "
+            + "JOIN subjects s ON s.subject_id = q.subject_id "
+            + "WHERE a.status = 'submitted' AND a.submitted_at IS NOT NULL AND r.total_points > 0 ";
+    private static final String NEWEST_FIRST = "ORDER BY a.submitted_at DESC, a.attempt_id DESC";
+
+    public List<ResultRecord> load(AuthenticatedUser admin) throws SQLException {
+        try (Connection connection = databaseConnection.getReadOnlyConnection()) {
+            AccessCheck.requireAdmin(connection, admin);
+            try (PreparedStatement statement = connection.prepareStatement(SELECT_RESULTS + NEWEST_FIRST)) {
+                return readResults(statement);
+            }
+        }
+    }
+
+    public List<ResultRecord> loadForTeacher(AuthenticatedUser teacher) throws SQLException {
+        try (Connection connection = databaseConnection.getReadOnlyConnection()) {
+            AccessCheck.requireTeacher(connection, teacher);
+            try (PreparedStatement statement = connection.prepareStatement(
+                    SELECT_RESULTS + "AND q.teacher_id = ? " + NEWEST_FIRST)) {
+                statement.setLong(1, teacher.id());
+                return readResults(statement);
+            }
+        }
+    }
+
+    private List<ResultRecord> readResults(PreparedStatement statement) throws SQLException {
+        List<ResultRecord> results = new ArrayList<>();
+        try (ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                results.add(new ResultRecord(
+                        result.getLong("attempt_id"),
+                        result.getLong("user_id"),
+                        result.getString("full_name"),
+                        result.getString("username"),
+                        result.getLong("quiz_id"),
+                        result.getString("title"),
+                        result.getLong("subject_id"),
+                        result.getString("subject_name"),
+                        result.getLong("score"),
+                        result.getLong("total_points"),
+                        result.getTimestamp("submitted_at").toLocalDateTime()));
+            }
+        }
+        return results;
+    }
 }

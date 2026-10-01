@@ -10,145 +10,385 @@
 
 package quizora.DAO;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import quizora.auth.AuthenticatedUser;
 import quizora.database.databaseConnection;
-import quizora.model.*;
+import quizora.model.QuizChanges;
+import quizora.model.QuizChoice;
+import quizora.model.QuizDetails;
+import quizora.model.QuizQuestion;
+import quizora.model.QuizRecord;
 
+/** Creates, reads, edits and archives quizzes and their questions. Used by admin Quiz Management and teacher Create Quiz. */
 public final class QuizManagementDAO {
-    private static final String SELECT = """
-        SELECT q.*,s.subject_name,u.full_name,
-        (SELECT COUNT(*) FROM questions x WHERE x.quiz_id=q.quiz_id) question_count,
-        (SELECT COALESCE(SUM(points),0) FROM questions x WHERE x.quiz_id=q.quiz_id) points,
-        (SELECT COUNT(*) FROM quiz_attempts a WHERE a.quiz_id=q.quiz_id) attempts
-        FROM quizzes q JOIN subjects s ON s.subject_id=q.subject_id JOIN users u ON u.user_id=q.teacher_id
-        """;
-    public record Data(List<QuizRecord> quizzes,List<QuizChoice> subjects,List<QuizChoice> teachers) {}
+
+    /** Everything the quiz form needs: the quiz list and the subject and teacher drop-downs. */
+    public record Data(List<QuizRecord> quizzes, List<QuizChoice> subjects, List<QuizChoice> teachers) { }
+
+    /** Every quiz with its subject, teacher, question count, total points and attempt count. */
+    private static final String SELECT_QUIZ = "SELECT q.*, s.subject_name, u.full_name, "
+            + "(SELECT COUNT(*) FROM questions x WHERE x.quiz_id = q.quiz_id) AS question_count, "
+            + "(SELECT COALESCE(SUM(points), 0) FROM questions x WHERE x.quiz_id = q.quiz_id) AS points, "
+            + "(SELECT COUNT(*) FROM quiz_attempts a WHERE a.quiz_id = q.quiz_id) AS attempts "
+            + "FROM quizzes q "
+            + "JOIN subjects s ON s.subject_id = q.subject_id "
+            + "JOIN users u ON u.user_id = q.teacher_id ";
+
+    // ---------- Reading ----------
+
     public Data load(AuthenticatedUser admin) throws SQLException {
-        try(var c=databaseConnection.getConnection()) {
-            c.setAutoCommit(false);
-            AccountManagementDAO.requireAdmin(c,admin,false);
-            var records=new ArrayList<QuizRecord>();
-            try(var s=c.prepareStatement(SELECT+" ORDER BY q.quiz_id DESC")){s.setQueryTimeout(10);try(var r=s.executeQuery()){while(r.next())records.add(read(r));}}
-            var subjects=choices(c,"SELECT subject_id,subject_name FROM subjects WHERE archived_at IS NULL ORDER BY subject_name");
-            var teachers=choices(c,"SELECT user_id,full_name FROM users WHERE role='teacher' AND is_active=TRUE AND archived_at IS NULL ORDER BY full_name");
-            c.commit();return new Data(List.copyOf(records),subjects,teachers);
-        }
-    }
-    public Data teacherCreationData(AuthenticatedUser teacher) throws SQLException {
-        try(var c=databaseConnection.getConnection()) {
-            c.setAutoCommit(false);
-            requireTeacher(c,teacher);
-            var subjects=new ArrayList<QuizChoice>();
-            try(var s=c.prepareStatement("SELECT s.subject_id,s.subject_name FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND s.archived_at IS NULL ORDER BY s.subject_name")) {
-                s.setQueryTimeout(10);s.setLong(1,teacher.id());
-                try(var r=s.executeQuery()){while(r.next())subjects.add(new QuizChoice(r.getLong(1),r.getString(2)));}
+        try (Connection connection = databaseConnection.getConnection()) {
+            AccessCheck.requireAdmin(connection, admin);
+            List<QuizRecord> quizzes = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(SELECT_QUIZ + "ORDER BY q.quiz_id DESC");
+                    ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    quizzes.add(readQuiz(result));
+                }
             }
-            c.commit();return new Data(List.of(),List.copyOf(subjects),List.of(new QuizChoice(teacher.id(),teacher.fullName())));
+            List<QuizChoice> subjects = choices(connection,
+                    "SELECT subject_id, subject_name FROM subjects WHERE archived_at IS NULL ORDER BY subject_name");
+            List<QuizChoice> teachers = choices(connection,
+                    "SELECT user_id, full_name FROM users "
+                    + "WHERE role = 'teacher' AND is_active = 1 AND archived_at IS NULL ORDER BY full_name");
+            return new Data(quizzes, subjects, teachers);
         }
     }
-    static void requireTeacher(Connection c,AuthenticatedUser teacher)throws SQLException {
-        if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
-        try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL")) {
-            s.setQueryTimeout(10);s.setLong(1,teacher.id());
-            try(var r=s.executeQuery()){if(!r.next())throw new SecurityException("Active teacher access is required.");}
-        }
-    }
-    public QuizRecord createForTeacher(AuthenticatedUser teacher,QuizChanges change,List<QuizQuestion> items)throws SQLException {
-        if(teacher==null||!"teacher".equals(teacher.role()))throw new SecurityException("Teacher access is required.");
-        if(change.teacherId()!=teacher.id())throw new SecurityException("You can only create your own quizzes.");
-        if(!List.of("draft","published").contains(change.state()))throw new IllegalArgumentException("Create a draft or published quiz.");
-        return save(teacher,null,change,items,true);
-    }
-    private List<QuizChoice> choices(Connection c,String sql)throws SQLException{
-        var list=new ArrayList<QuizChoice>();
-        try(var s=c.prepareStatement(sql)){s.setQueryTimeout(10);try(var r=s.executeQuery()){while(r.next())list.add(new QuizChoice(r.getLong(1),r.getString(2)));}}
-        return List.copyOf(list);
-    }
-    public QuizDetails details(AuthenticatedUser admin,long id)throws SQLException{
-        try(var c=databaseConnection.getConnection()){
-            c.setAutoCommit(false);AccountManagementDAO.requireAdmin(c,admin,false);
-            var result=new QuizDetails(find(c,id),questions(c,id));c.commit();return result;
-        }
-    }
-    private QuizRecord find(Connection c,long id)throws SQLException{
-        try(var s=c.prepareStatement(SELECT+" WHERE q.quiz_id=?")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){
-            if(!r.next())throw new SQLException("Quiz no longer exists. Refresh and try again.","40001");return read(r);
-        }}
-    }
-    private List<QuizQuestion> questions(Connection c,long id)throws SQLException{
-        var list=new ArrayList<QuizQuestion>();
-        try(var s=c.prepareStatement("SELECT * FROM questions WHERE quiz_id=? ORDER BY question_order")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){
-            while(r.next())list.add(new QuizQuestion(r.getLong("question_id"),r.getString("question_text"),r.getString("option_a"),r.getString("option_b"),r.getString("option_c"),r.getString("option_d"),r.getString("correct_answer"),r.getInt("points")));
-        }}return List.copyOf(list);
-    }
-    public QuizRecord save(AuthenticatedUser admin,QuizDetails original,QuizChanges change,List<QuizQuestion> items)throws SQLException{
-        return save(admin,original,change,items,false);
-    }
-    private QuizRecord save(AuthenticatedUser admin,QuizDetails original,QuizChanges change,List<QuizQuestion> items,boolean teacherCreation)throws SQLException{
-        Objects.requireNonNull(change);items=List.copyOf(items);
-        if(items.size()>500)throw new IllegalArgumentException("A quiz can contain at most 500 questions.");
-        if(change.state().equals("published")&&items.isEmpty())throw new IllegalArgumentException("Add at least one question before publishing.");
-        try(var c=databaseConnection.getConnection()){
-            c.setAutoCommit(false);
-            try{
-                if(teacherCreation){
-                    requireTeacher(c,admin);
-                    try(var s=c.prepareStatement("SELECT ts.subject_id FROM teacher_subjects ts JOIN subjects s ON s.subject_id=ts.subject_id WHERE ts.teacher_id=? AND ts.subject_id=? AND s.archived_at IS NULL")) {
-                        s.setQueryTimeout(10);s.setLong(1,admin.id());s.setLong(2,change.subjectId());
-                        try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("This subject is no longer assigned to you or has been archived. Refresh subjects and try again.");}
-                    }
-                }else AccountManagementDAO.requireAdmin(c,admin,true);
-                long id=original==null?0:original.quiz().id();
-                QuizRecord current=null;
-                if(original!=null){
-                    lock(c,id);current=find(c,id);
-                    if(!current.equals(original.quiz())||!questions(c,id).equals(original.questions()))throw new SQLException("Quiz changed. Close the form, refresh, and try again.","40001");
-                    if(current.archived())throw new IllegalArgumentException("Archived quizzes are read-only.");
-                    if(current.attempts()>0 && (!items.equals(original.questions())||change.minutes()!=current.minutes()||change.subjectId()!=current.subjectId()||change.teacherId()!=current.teacherId()||change.state().equals("draft")))
-                        throw new IllegalArgumentException("Quizzes with attempts retain their questions, time limit, subject and teacher, and cannot return to draft.");
-                }
-                try(var s=c.prepareStatement("SELECT user_id FROM users WHERE user_id=? AND role='teacher' AND is_active=TRUE AND archived_at IS NULL")){
-                    s.setLong(1,change.teacherId());try(var r=s.executeQuery()){
-                        if(!r.next()&&(current==null||current.teacherId()!=change.teacherId()))throw new IllegalArgumentException("Select an active teacher.");
+
+    /** The subjects a teacher may create quizzes for: their active assigned subjects. */
+    public Data teacherCreationData(AuthenticatedUser teacher) throws SQLException {
+        try (Connection connection = databaseConnection.getConnection()) {
+            AccessCheck.requireTeacher(connection, teacher);
+            List<QuizChoice> subjects = new ArrayList<>();
+            String sql = "SELECT s.subject_id, s.subject_name FROM teacher_subjects ts "
+                    + "JOIN subjects s ON s.subject_id = ts.subject_id "
+                    + "WHERE ts.teacher_id = ? AND s.archived_at IS NULL ORDER BY s.subject_name";
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setLong(1, teacher.id());
+                try (ResultSet result = statement.executeQuery()) {
+                    while (result.next()) {
+                        subjects.add(new QuizChoice(result.getLong("subject_id"), result.getString("subject_name")));
                     }
                 }
-                try(var s=c.prepareStatement("SELECT subject_id,archived_at FROM subjects WHERE subject_id=?")){
-                    s.setLong(1,change.subjectId());try(var r=s.executeQuery()){if(!r.next())throw new IllegalArgumentException("Subject no longer exists. Refresh and try again.");
-                    if(r.getTimestamp("archived_at")!=null&&(current==null||current.subjectId()!=change.subjectId()))throw new IllegalArgumentException("Select an active subject.");}
-                }
-                String sql=id==0?"INSERT INTO quizzes(title,description,subject_id,teacher_id,time_limit_minutes,status) VALUES(?,?,?,?,?,?)":"UPDATE quizzes SET title=?,description=?,subject_id=?,teacher_id=?,time_limit_minutes=?,status=?,updated_at=datetime('now','localtime') WHERE quiz_id=?";
-                try(var s=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){
-                    s.setQueryTimeout(10);s.setString(1,change.title());s.setString(2,change.description());s.setLong(3,change.subjectId());s.setLong(4,change.teacherId());s.setInt(5,change.minutes());s.setString(6,change.state());
-                    if(id!=0)s.setLong(7,id);s.executeUpdate();
-                    if(id==0)try(var keys=s.getGeneratedKeys()){if(!keys.next())throw new SQLException("Quiz ID missing");id=keys.getLong(1);}
-                }
-                if(original==null||!items.equals(original.questions())){
-                    try(var s=c.prepareStatement("DELETE FROM questions WHERE quiz_id=?")){s.setLong(1,id);s.executeUpdate();}
-                    try(var s=c.prepareStatement("INSERT INTO questions(quiz_id,question_text,option_a,option_b,option_c,option_d,correct_answer,points,question_order) VALUES(?,?,?,?,?,?,?,?,?)")){
-                        int order=0;for(var q:items){s.setLong(1,id);s.setString(2,q.text());s.setString(3,q.a());s.setString(4,q.b());s.setString(5,q.c());s.setString(6,q.d());s.setString(7,q.answer());s.setInt(8,q.points());s.setInt(9,++order);s.addBatch();}s.executeBatch();
-                    }
-                }
-                var result=find(c,id);c.commit();return result;
-            }catch(SQLException|RuntimeException e){c.rollback();throw e;}
+            }
+            List<QuizChoice> teachers = new ArrayList<>();
+            teachers.add(new QuizChoice(teacher.id(), teacher.fullName()));
+            return new Data(new ArrayList<>(), subjects, teachers);
         }
     }
-    public QuizRecord archive(AuthenticatedUser admin,QuizRecord original)throws SQLException{
-        try(var c=databaseConnection.getConnection()){
-            c.setAutoCommit(false);try{
-                AccountManagementDAO.requireAdmin(c,admin,true);lock(c,original.id());var current=find(c,original.id());
-                if(!current.equals(original))throw new SQLException("Quiz changed. Refresh and try again.","40001");
-                if(current.archived())throw new IllegalArgumentException("Quiz is already archived.");
-                try(var s=c.prepareStatement("UPDATE quizzes SET status='closed',archived_at=datetime('now','localtime') WHERE quiz_id=?")){s.setLong(1,original.id());s.executeUpdate();}
-                var result=find(c,original.id());c.commit();return result;
-            }catch(SQLException|RuntimeException e){c.rollback();throw e;}
+
+    public QuizDetails details(AuthenticatedUser admin, long quizId) throws SQLException {
+        try (Connection connection = databaseConnection.getConnection()) {
+            AccessCheck.requireAdmin(connection, admin);
+            return new QuizDetails(findQuiz(connection, quizId), findQuestions(connection, quizId));
         }
     }
-    private void lock(Connection c,long id)throws SQLException{
-        try(var s=c.prepareStatement("SELECT quiz_id FROM quizzes WHERE quiz_id=?")){s.setQueryTimeout(10);s.setLong(1,id);try(var r=s.executeQuery()){if(!r.next())throw new SQLException("Quiz no longer exists.","40001");}}
+
+    // ---------- Saving ----------
+
+    /** A teacher can only create a draft or published quiz of their own, for an assigned subject. */
+    public QuizRecord createForTeacher(AuthenticatedUser teacher, QuizChanges changes, List<QuizQuestion> questions)
+            throws SQLException {
+        if (teacher == null || !teacher.role().equals("teacher")) {
+            throw new SecurityException("Teacher access is required.");
+        }
+        if (changes.teacherId() != teacher.id()) {
+            throw new SecurityException("You can only create your own quizzes.");
+        }
+        if (!changes.state().equals("draft") && !changes.state().equals("published")) {
+            throw new IllegalArgumentException("Create a draft or published quiz.");
+        }
+        return saveQuiz(teacher, null, changes, questions, true);
     }
-    private QuizRecord read(ResultSet r)throws SQLException{
-        return new QuizRecord(r.getLong("quiz_id"),r.getLong("subject_id"),r.getString("subject_name"),r.getLong("teacher_id"),r.getString("full_name"),r.getString("title"),Objects.requireNonNullElse(r.getString("description"),""),r.getInt("time_limit_minutes"),r.getString("status"),r.getTimestamp("archived_at")!=null,r.getInt("question_count"),r.getLong("points"),r.getInt("attempts"),r.getTimestamp("updated_at").toLocalDateTime());
+
+    /** Admin add (original is null) or edit (original is the quiz shown in the form). */
+    public QuizRecord save(AuthenticatedUser admin, QuizDetails original, QuizChanges changes, List<QuizQuestion> questions)
+            throws SQLException {
+        return saveQuiz(admin, original, changes, questions, false);
+    }
+
+    private QuizRecord saveQuiz(AuthenticatedUser user, QuizDetails original, QuizChanges changes,
+            List<QuizQuestion> questions, boolean teacherCreation) throws SQLException {
+        if (changes == null) {
+            throw new NullPointerException("Quiz details are required.");
+        }
+        List<QuizQuestion> newQuestions = new ArrayList<>(questions);
+        if (newQuestions.size() > 500) {
+            throw new IllegalArgumentException("A quiz can contain at most 500 questions.");
+        }
+        if (changes.state().equals("published") && newQuestions.isEmpty()) {
+            throw new IllegalArgumentException("Add at least one question before publishing.");
+        }
+
+        try (Connection connection = databaseConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                if (teacherCreation) {
+                    AccessCheck.requireTeacher(connection, user);
+                    checkSubjectAssigned(connection, user.id(), changes.subjectId());
+                } else {
+                    AccessCheck.requireAdmin(connection, user);
+                }
+
+                QuizRecord current = null;
+                if (original != null) {
+                    current = findQuiz(connection, original.quiz().id());
+                    checkCanEdit(connection, current, original, changes, newQuestions);
+                }
+                checkTeacher(connection, changes, current);
+                checkSubject(connection, changes, current);
+
+                long quizId;
+                if (original == null) {
+                    quizId = insertQuiz(connection, changes);
+                } else {
+                    quizId = original.quiz().id();
+                    updateQuiz(connection, quizId, changes);
+                }
+                if (original == null || !newQuestions.equals(original.questions())) {
+                    replaceQuestions(connection, quizId, newQuestions);
+                }
+
+                QuizRecord saved = findQuiz(connection, quizId);
+                connection.commit();
+                return saved;
+            } catch (SQLException | RuntimeException error) {
+                connection.rollback();
+                throw error;
+            }
+        }
+    }
+
+    /** Archiving closes the quiz but keeps its questions, attempts and results. */
+    public QuizRecord archive(AuthenticatedUser admin, QuizRecord original) throws SQLException {
+        try (Connection connection = databaseConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                AccessCheck.requireAdmin(connection, admin);
+                QuizRecord current = findQuiz(connection, original.id());
+                if (!current.equals(original)) {
+                    throw new SQLException("Quiz changed. Refresh and try again.", "40001");
+                }
+                if (current.archived()) {
+                    throw new IllegalArgumentException("Quiz is already archived.");
+                }
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "UPDATE quizzes SET status = 'closed', archived_at = datetime('now', 'localtime') WHERE quiz_id = ?")) {
+                    statement.setLong(1, original.id());
+                    statement.executeUpdate();
+                }
+                QuizRecord archived = findQuiz(connection, original.id());
+                connection.commit();
+                return archived;
+            } catch (SQLException | RuntimeException error) {
+                connection.rollback();
+                throw error;
+            }
+        }
+    }
+
+    // ---------- Checks used while saving ----------
+
+    private void checkSubjectAssigned(Connection connection, long teacherId, long subjectId) throws SQLException {
+        String sql = "SELECT ts.subject_id FROM teacher_subjects ts "
+                + "JOIN subjects s ON s.subject_id = ts.subject_id "
+                + "WHERE ts.teacher_id = ? AND ts.subject_id = ? AND s.archived_at IS NULL";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, teacherId);
+            statement.setLong(2, subjectId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("This subject is no longer assigned to you or has been archived. Refresh subjects and try again.");
+                }
+            }
+        }
+    }
+
+    /** Stops edits to stale or archived quizzes, and keeps scoring fixed once students have attempts. */
+    private void checkCanEdit(Connection connection, QuizRecord current, QuizDetails original, QuizChanges changes,
+            List<QuizQuestion> newQuestions) throws SQLException {
+        List<QuizQuestion> currentQuestions = findQuestions(connection, current.id());
+        if (!current.equals(original.quiz()) || !currentQuestions.equals(original.questions())) {
+            throw new SQLException("Quiz changed. Close the form, refresh, and try again.", "40001");
+        }
+        if (current.archived()) {
+            throw new IllegalArgumentException("Archived quizzes are read-only.");
+        }
+        if (current.attempts() > 0) {
+            boolean questionsChanged = !newQuestions.equals(original.questions());
+            boolean timeChanged = changes.minutes() != current.minutes();
+            boolean subjectChanged = changes.subjectId() != current.subjectId();
+            boolean teacherChanged = changes.teacherId() != current.teacherId();
+            boolean backToDraft = changes.state().equals("draft");
+            if (questionsChanged || timeChanged || subjectChanged || teacherChanged || backToDraft) {
+                throw new IllegalArgumentException("Quizzes with attempts retain their questions, time limit, subject and teacher, and cannot return to draft.");
+            }
+        }
+    }
+
+    /** The teacher must be active, unless the quiz already belongs to that teacher. */
+    private void checkTeacher(Connection connection, QuizChanges changes, QuizRecord current) throws SQLException {
+        String sql = "SELECT user_id FROM users WHERE user_id = ? AND role = 'teacher' AND is_active = 1 AND archived_at IS NULL";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, changes.teacherId());
+            try (ResultSet result = statement.executeQuery()) {
+                boolean activeTeacher = result.next();
+                boolean sameTeacher = current != null && current.teacherId() == changes.teacherId();
+                if (!activeTeacher && !sameTeacher) {
+                    throw new IllegalArgumentException("Select an active teacher.");
+                }
+            }
+        }
+    }
+
+    /** The subject must exist and be active, unless the quiz already uses that subject. */
+    private void checkSubject(Connection connection, QuizChanges changes, QuizRecord current) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT archived_at FROM subjects WHERE subject_id = ?")) {
+            statement.setLong(1, changes.subjectId());
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("Subject no longer exists. Refresh and try again.");
+                }
+                boolean archived = result.getString("archived_at") != null;
+                boolean sameSubject = current != null && current.subjectId() == changes.subjectId();
+                if (archived && !sameSubject) {
+                    throw new IllegalArgumentException("Select an active subject.");
+                }
+            }
+        }
+    }
+
+    // ---------- Writing rows ----------
+
+    private long insertQuiz(Connection connection, QuizChanges changes) throws SQLException {
+        String sql = "INSERT INTO quizzes (title, description, subject_id, teacher_id, time_limit_minutes, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, changes.title());
+            statement.setString(2, changes.description());
+            statement.setLong(3, changes.subjectId());
+            statement.setLong(4, changes.teacherId());
+            statement.setInt(5, changes.minutes());
+            statement.setString(6, changes.state());
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                keys.next();
+                return keys.getLong(1);
+            }
+        }
+    }
+
+    private void updateQuiz(Connection connection, long quizId, QuizChanges changes) throws SQLException {
+        String sql = "UPDATE quizzes SET title = ?, description = ?, subject_id = ?, teacher_id = ?, "
+                + "time_limit_minutes = ?, status = ?, updated_at = datetime('now', 'localtime') WHERE quiz_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, changes.title());
+            statement.setString(2, changes.description());
+            statement.setLong(3, changes.subjectId());
+            statement.setLong(4, changes.teacherId());
+            statement.setInt(5, changes.minutes());
+            statement.setString(6, changes.state());
+            statement.setLong(7, quizId);
+            statement.executeUpdate();
+        }
+    }
+
+    /** Deletes the old questions and saves the new ones in order. */
+    private void replaceQuestions(Connection connection, long quizId, List<QuizQuestion> questions) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM questions WHERE quiz_id = ?")) {
+            statement.setLong(1, quizId);
+            statement.executeUpdate();
+        }
+        String sql = "INSERT INTO questions (quiz_id, question_text, option_a, option_b, option_c, option_d, "
+                + "correct_answer, points, question_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            int order = 1;
+            for (QuizQuestion question : questions) {
+                statement.setLong(1, quizId);
+                statement.setString(2, question.text());
+                statement.setString(3, question.a());
+                statement.setString(4, question.b());
+                statement.setString(5, question.c());
+                statement.setString(6, question.d());
+                statement.setString(7, question.answer());
+                statement.setInt(8, question.points());
+                statement.setInt(9, order);
+                statement.executeUpdate();
+                order++;
+            }
+        }
+    }
+
+    // ---------- Reading rows ----------
+
+    private QuizRecord findQuiz(Connection connection, long quizId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_QUIZ + "WHERE q.quiz_id = ?")) {
+            statement.setLong(1, quizId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new SQLException("Quiz no longer exists. Refresh and try again.", "40001");
+                }
+                return readQuiz(result);
+            }
+        }
+    }
+
+    private List<QuizQuestion> findQuestions(Connection connection, long quizId) throws SQLException {
+        List<QuizQuestion> questions = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT * FROM questions WHERE quiz_id = ? ORDER BY question_order")) {
+            statement.setLong(1, quizId);
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    questions.add(new QuizQuestion(
+                            result.getLong("question_id"),
+                            result.getString("question_text"),
+                            result.getString("option_a"),
+                            result.getString("option_b"),
+                            result.getString("option_c"),
+                            result.getString("option_d"),
+                            result.getString("correct_answer"),
+                            result.getInt("points")));
+                }
+            }
+        }
+        return questions;
+    }
+
+    private List<QuizChoice> choices(Connection connection, String sql) throws SQLException {
+        List<QuizChoice> choices = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                choices.add(new QuizChoice(result.getLong(1), result.getString(2)));
+            }
+        }
+        return choices;
+    }
+
+    private QuizRecord readQuiz(ResultSet result) throws SQLException {
+        String description = result.getString("description");
+        return new QuizRecord(
+                result.getLong("quiz_id"),
+                result.getLong("subject_id"),
+                result.getString("subject_name"),
+                result.getLong("teacher_id"),
+                result.getString("full_name"),
+                result.getString("title"),
+                description == null ? "" : description,
+                result.getInt("time_limit_minutes"),
+                result.getString("status"),
+                result.getString("archived_at") != null,
+                result.getInt("question_count"),
+                result.getLong("points"),
+                result.getInt("attempts"),
+                result.getTimestamp("updated_at").toLocalDateTime());
     }
 }

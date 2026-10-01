@@ -60,7 +60,6 @@ public final class PasswordRecoveryUiTest extends Application {
         try (var connection = databaseConnection.getConnection(); var insert = connection.createStatement()) {
             insert.executeUpdate("INSERT INTO users(full_name,username,email,password_hash) VALUES ('Test','test','test@example.com','unused')");
         }
-        quizora.Quizora.satoshi(14);
         var service = new PasswordRecoveryService(clock, (email, value) -> {
             if (failDelivery.get()) throw new java.io.IOException("Simulated failure"); code.set(value); return clock.instant();
         }, new PasswordRecoveryDAO());

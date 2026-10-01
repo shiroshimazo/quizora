@@ -1,3 +1,7 @@
+/* Registers the bundled Satoshi faces; JavaFX matches them by their internal names below. */
+@font-face { font-family: "Satoshi Variable SemiBold"; src: url("../fonts/Satoshi-SemiBold.ttf"); }
+@font-face { font-family: "Satoshi Variable Bold"; src: url("../fonts/Satoshi-Bold.ttf"); }
+
 .root, .label, .text-input, .button, .toggle-button, .check-box,
 .radio-button, .hyperlink, .combo-box-base, .list-cell, .table-cell {
     -fx-font-family: "Satoshi Variable SemiBold";

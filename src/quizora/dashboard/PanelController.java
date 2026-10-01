@@ -12,200 +12,119 @@ package quizora.dashboard;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import quizora.Quizora;
+import quizora.auth.UserSession;
+import quizora.controllerAdmin.*;
+import quizora.controllerStudent.availableQuizzesController;
+import quizora.controllerStudent.quizResultsController;
+import quizora.controllerStudent.takeQuizController;
+import quizora.controllerTeacher.assignedSubjectsController;
+import quizora.controllerTeacher.createQuizController;
+import quizora.controllerTeacher.quizStatisticsController;
+import quizora.controllerTeacher.studentResultsController;
 
-/** Shared navigation behavior for the three presentation-only role shells. */
+/** Sidebar navigation and logout shared by the admin, teacher and student shells. */
 public class PanelController implements Initializable {
-    /** Test hook: when non-null, replaces the modal dialog (true = confirm). */
-    public static java.util.function.BooleanSupplier confirmOverride;
-    @FXML private ToggleGroup navigationGroup;
     @FXML private StackPane workspacePane;
-    @FXML private javafx.scene.Node dashboardContent;
-    @FXML private javafx.scene.Node availableQuizzesContent;
-    @FXML private quizora.controllerStudent.availableQuizzesController availableQuizzesContentController;
-    @FXML private javafx.scene.Node takeQuizContent;
-    @FXML private quizora.controllerStudent.takeQuizController takeQuizContentController;
     @FXML private ToggleButton takeQuizButton;
-    @FXML private javafx.scene.Node studentQuizResultsContent, studentProfileContent;
-    @FXML private quizora.controllerStudent.quizResultsController studentQuizResultsContentController;
-    @FXML private quizora.controllerStudent.profileController studentProfileContentController;
-    @FXML private javafx.scene.Node teacherProfileContent;
+
+    // Each shell injects only its own pages; the others stay null and are skipped.
+    @FXML private Node dashboardContent, studentContent, teacherContent, quizContent, subjectContent, reportsContent,
+            resultsContent, accountContent, createQuizContent, assignedSubjectsContent, studentResultsContent,
+            quizStatisticsContent, teacherProfileContent, availableQuizzesContent, takeQuizContent,
+            studentQuizResultsContent, studentProfileContent;
+    @FXML private studentManagementController studentContentController;
+    @FXML private teacherManagementController teacherContentController;
+    @FXML private quizManagementController quizContentController;
+    @FXML private subjectCategoryManagementController subjectContentController;
+    @FXML private reportsController reportsContentController;
+    @FXML private resultsController resultsContentController;
+    @FXML private accountManagementController accountContentController;
+    @FXML private createQuizController createQuizContentController;
+    @FXML private assignedSubjectsController assignedSubjectsContentController;
+    @FXML private studentResultsController studentResultsContentController;
+    @FXML private quizStatisticsController quizStatisticsContentController;
     @FXML private quizora.controllerTeacher.profileController teacherProfileContentController;
-    @FXML private javafx.scene.Node quizStatisticsContent;
-    @FXML private quizora.controllerTeacher.quizStatisticsController quizStatisticsContentController;
-    @FXML private javafx.scene.Node studentResultsContent;
-    @FXML private quizora.controllerTeacher.studentResultsController studentResultsContentController;
-    @FXML private javafx.scene.Node assignedSubjectsContent;
-    @FXML private quizora.controllerTeacher.assignedSubjectsController assignedSubjectsContentController;
-    @FXML private javafx.scene.Node createQuizContent;
-    @FXML private quizora.controllerTeacher.createQuizController createQuizContentController;
-    @FXML private javafx.scene.Node studentContent;
-    @FXML private quizora.controllerAdmin.studentManagementController studentContentController;
-    @FXML private javafx.scene.Node teacherContent;
-    @FXML private quizora.controllerAdmin.teacherManagementController teacherContentController;
-    @FXML private javafx.scene.Node quizContent;
-    @FXML private quizora.controllerAdmin.quizManagementController quizContentController;
+    @FXML private availableQuizzesController availableQuizzesContentController;
+    @FXML private takeQuizController takeQuizContentController;
+    @FXML private quizResultsController studentQuizResultsContentController;
+    @FXML private quizora.controllerStudent.profileController studentProfileContentController;
 
-    @FXML private javafx.scene.Node subjectContent;
-    @FXML private quizora.controllerAdmin.subjectCategoryManagementController subjectContentController;
-
-    @FXML private javafx.scene.Node reportsContent;
-    @FXML private quizora.controllerAdmin.reportsController reportsContentController;
-
-    @FXML private javafx.scene.Node resultsContent;
-    @FXML private quizora.controllerAdmin.resultsController resultsContentController;
-
-    @FXML private javafx.scene.Node accountContent;
-    @FXML private quizora.controllerAdmin.accountManagementController accountContentController;
+    /** Sidebar button ID to its page, and what to load when that page opens. */
+    private final Map<String, Node> pages = new HashMap<>();
+    private final Map<String, Runnable> loaders = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (availableQuizzesContentController != null && takeQuizContentController != null) {
+        page("dashboardButton", dashboardContent, null);
+        page("studentManagementButton", studentContent, () -> studentContentController.refresh());
+        page("teacherManagementButton", teacherContent, () -> teacherContentController.refresh());
+        page("quizManagementButton", quizContent, () -> quizContentController.refresh());
+        page("subjectCategoryManagementButton", subjectContent, () -> subjectContentController.refresh());
+        page("reportsButton", reportsContent, () -> reportsContentController.refresh());
+        page("resultsButton", resultsContent, () -> resultsContentController.refresh());
+        page("accountManagementButton", accountContent, () -> accountContentController.refresh());
+        page("createQuizButton", createQuizContent, () -> createQuizContentController.open());
+        page("assignedSubjectsButton", assignedSubjectsContent, () -> assignedSubjectsContentController.refresh());
+        page("studentResultsButton", studentResultsContent, () -> studentResultsContentController.refresh());
+        page("quizStatisticsButton", quizStatisticsContent, () -> quizStatisticsContentController.refresh());
+        page("profileButton", teacherProfileContent, () -> teacherProfileContentController.refresh());
+        page("availableQuizzesButton", availableQuizzesContent, () -> availableQuizzesContentController.refresh());
+        page("takeQuizButton", takeQuizContent, () -> takeQuizContentController.open());
+        page("quizResultsButton", studentQuizResultsContent, () -> studentQuizResultsContentController.refresh());
+        page("profileButton", studentProfileContent, () -> studentProfileContentController.refresh());
+        if (availableQuizzesContentController != null) {
             availableQuizzesContentController.setTakeQuizHandler(quizId -> {
                 takeQuizContentController.selectQuiz(quizId);
-                navigate(new ActionEvent(takeQuizButton,takeQuizButton));
+                show(takeQuizButton);
             });
         }
-        navigationGroup.selectedToggleProperty().addListener((observable, previous, selected) -> {
-            if (selected == null && previous != null) {
-                previous.setSelected(true);
-            }
-        });
+    }
+
+    private void page(String buttonId, Node content, Runnable loader) {
+        if (content == null) return;
+        pages.put(buttonId, content);
+        if (loader != null) loaders.put(buttonId, loader);
     }
 
     @FXML
     private void navigate(ActionEvent event) {
-        ToggleButton destination = (ToggleButton) event.getSource();
+        show((ToggleButton) event.getSource());
+    }
+
+    private void show(ToggleButton destination) {
+        // Re-selecting keeps a page selected when its already-active button is clicked again.
         destination.setSelected(true);
         workspacePane.setAccessibleText(destination.getText() + " workspace");
-        if (studentQuizResultsContent != null) {
-            boolean results = "quizResultsButton".equals(destination.getId());
-            studentQuizResultsContent.setVisible(results);
-            studentQuizResultsContent.setManaged(results);
-            if (results) studentQuizResultsContentController.refresh();
-        }
-        if (studentProfileContent != null) {
-            boolean profile = "profileButton".equals(destination.getId());
-            studentProfileContent.setVisible(profile);
-            studentProfileContent.setManaged(profile);
-            if (profile) studentProfileContentController.refresh();
-        }
-        if (takeQuizContent != null) {
-            boolean taking = "takeQuizButton".equals(destination.getId());
-            takeQuizContent.setVisible(taking);
-            takeQuizContent.setManaged(taking);
-            if (taking) takeQuizContentController.open();
-        }
-        if (availableQuizzesContent != null) {
-            boolean available = "availableQuizzesButton".equals(destination.getId());
-            availableQuizzesContent.setVisible(available);
-            availableQuizzesContent.setManaged(available);
-            if (available) availableQuizzesContentController.refresh();
-        }
-        if(teacherProfileContent != null){
-            boolean profile="profileButton".equals(destination.getId());
-            teacherProfileContent.setVisible(profile);teacherProfileContent.setManaged(profile);
-            if(profile)teacherProfileContentController.refresh();
-        }
-        if(quizStatisticsContent != null){
-            boolean statistics="quizStatisticsButton".equals(destination.getId());
-            quizStatisticsContent.setVisible(statistics);quizStatisticsContent.setManaged(statistics);
-            if(statistics)quizStatisticsContentController.refresh();
-        }
-        if(studentResultsContent != null){
-            boolean results="studentResultsButton".equals(destination.getId());
-            studentResultsContent.setVisible(results);studentResultsContent.setManaged(results);
-            if(results)studentResultsContentController.refresh();
-        }
-        if(assignedSubjectsContent != null){
-            boolean assigned="assignedSubjectsButton".equals(destination.getId());
-            assignedSubjectsContent.setVisible(assigned);assignedSubjectsContent.setManaged(assigned);
-            if(assigned)assignedSubjectsContentController.refresh();
-        }
-        if(createQuizContent != null){
-            boolean create="createQuizButton".equals(destination.getId());
-            createQuizContent.setVisible(create);createQuizContent.setManaged(create);
-            if(create)createQuizContentController.open();
-        }
-        if (dashboardContent != null) {
-            boolean dashboard = "dashboardButton".equals(destination.getId());
-            dashboardContent.setVisible(dashboard);
-            dashboardContent.setManaged(dashboard);
-        }
-        if (studentContent != null) {
-            boolean students = "studentManagementButton".equals(destination.getId());
-            studentContent.setVisible(students);
-            studentContent.setManaged(students);
-            if (students) studentContentController.refresh();
-        }
-        if (accountContent != null) {
-            boolean account = "accountManagementButton".equals(destination.getId());
-            accountContent.setVisible(account);
-            accountContent.setManaged(account);
-            if (account) accountContentController.refresh();
-        }
-        if (resultsContent != null) {
-            boolean results = "resultsButton".equals(destination.getId());
-            resultsContent.setVisible(results);
-            resultsContent.setManaged(results);
-            if (results) resultsContentController.refresh();
-        }
-        if (reportsContent != null) {
-            boolean reports = "reportsButton".equals(destination.getId());
-            reportsContent.setVisible(reports);
-            reportsContent.setManaged(reports);
-            if (reports) reportsContentController.refresh();
-        }
-        if (subjectContent != null) {
-            boolean subjects = "subjectCategoryManagementButton".equals(destination.getId());
-            subjectContent.setVisible(subjects);
-            subjectContent.setManaged(subjects);
-            if (subjects) subjectContentController.refresh();
-        }
-        if (quizContent != null) {
-            boolean quizzes = "quizManagementButton".equals(destination.getId());
-            quizContent.setVisible(quizzes);
-            quizContent.setManaged(quizzes);
-            if (quizzes) quizContentController.refresh();
-        }
-        if (teacherContent != null) {
-            boolean teachers = "teacherManagementButton".equals(destination.getId());
-            teacherContent.setVisible(teachers);
-            teacherContent.setManaged(teachers);
-            if (teachers) teacherContentController.refresh();
-        }
+        pages.forEach((buttonId, page) -> {
+            boolean shown = buttonId.equals(destination.getId());
+            page.setVisible(shown);
+            page.setManaged(shown);
+        });
+        Runnable loader = loaders.get(destination.getId());
+        if (loader != null) loader.run();
     }
 
     @FXML
-    private void logout(ActionEvent event) throws IOException {
-        if (!confirmLogout()) {
-            return;
-        }
-        quizora.auth.UserSession.clear();
-        new Quizora().start((Stage) workspacePane.getScene().getWindow());
-    }
-
-    private boolean confirmLogout() {
-        if (confirmOverride != null) {
-            return confirmOverride.getAsBoolean();
-        }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    private void logout() throws IOException {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You will be returned to the login screen.");
         alert.setTitle("Confirm Logout");
         alert.setHeaderText("Are you sure you want to log out?");
-        alert.setContentText("You will be returned to the login screen.");
         alert.initOwner(workspacePane.getScene().getWindow());
-        alert.initModality(Modality.APPLICATION_MODAL);
-        return alert.showAndWait().filter(ButtonType.OK::equals).isPresent();
+        if (alert.showAndWait().filter(ButtonType.OK::equals).isEmpty()) return;
+        UserSession.clear();
+        new Quizora().start((Stage) workspacePane.getScene().getWindow());
     }
 }

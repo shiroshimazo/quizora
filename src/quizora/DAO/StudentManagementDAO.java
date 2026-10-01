@@ -10,7 +10,10 @@
 
 package quizora.DAO;
 
-/** Admin-only management of student accounts. */
+/** Admin-only management of student accounts. All the work is in AccountManagementDAO. */
 public final class StudentManagementDAO extends AccountManagementDAO {
-    public StudentManagementDAO() { super("student"); }
+
+    public StudentManagementDAO() {
+        super("student");
+    }
 }

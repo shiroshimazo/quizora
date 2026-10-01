@@ -10,65 +10,101 @@
 
 package quizora.DAO;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
 import quizora.auth.AuthenticatedUser;
 import quizora.database.databaseConnection;
 import quizora.model.ReportData;
 
+/** All-time quiz, student and teacher statistics for the admin Reports page and its PDF export. */
 public final class ReportsDAO {
-    public ReportData load(AuthenticatedUser admin, int threshold) throws SQLException {
-        if (threshold < 0 || threshold > 100) throw new IllegalArgumentException("Passing score must be between 0 and 100.");
-        try (var c = databaseConnection.getReadOnlyConnection()) {
-            c.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-            c.setAutoCommit(false);
-            AccountManagementDAO.requireAdmin(c, admin, false);
-            ReportData data = snapshot(c, threshold);
-            c.commit();
+
+    public ReportData load(AuthenticatedUser admin, int passThreshold) throws SQLException {
+        if (passThreshold < 0 || passThreshold > 100) {
+            throw new IllegalArgumentException("Passing score must be between 0 and 100.");
+        }
+        try (Connection connection = databaseConnection.getReadOnlyConnection()) {
+            // One transaction so every number comes from the same moment.
+            connection.setAutoCommit(false);
+            AccessCheck.requireAdmin(connection, admin);
+
+            ReportData.Accounts students = accounts(connection, "student");
+            ReportData.Accounts teachers = accounts(connection, "teacher");
+            LocalDateTime generatedAt = now(connection);
+            long quizzes = count(connection, "SELECT COUNT(*) FROM quizzes");
+            long published = count(connection, "SELECT COUNT(*) FROM quizzes WHERE status = 'published' AND archived_at IS NULL");
+            long archivedQuizzes = count(connection, "SELECT COUNT(*) FROM quizzes WHERE archived_at IS NOT NULL");
+            long attempts = count(connection, "SELECT COUNT(*) FROM quiz_attempts");
+            long submitted = count(connection, "SELECT COUNT(*) FROM quiz_attempts WHERE status = 'submitted'");
+
+            // Scores use submitted attempts with a finalized result, as percentages.
+            String scoreSql = "SELECT COUNT(*), "
+                    + "AVG(100.0 * r.score / r.total_points), "
+                    + "MIN(100.0 * r.score / r.total_points), "
+                    + "MAX(100.0 * r.score / r.total_points), "
+                    + "AVG(CASE WHEN 100.0 * r.score / r.total_points >= ? THEN 100.0 ELSE 0 END) "
+                    + "FROM quiz_results r JOIN quiz_attempts a ON a.attempt_id = r.attempt_id "
+                    + "WHERE a.status = 'submitted' AND r.total_points > 0";
+            ReportData data;
+            try (PreparedStatement statement = connection.prepareStatement(scoreSql)) {
+                statement.setInt(1, passThreshold);
+                try (ResultSet result = statement.executeQuery()) {
+                    result.next();
+                    long scored = result.getLong(1);
+                    Double average = numberOrNull(result, 2);
+                    Double lowest = numberOrNull(result, 3);
+                    Double highest = numberOrNull(result, 4);
+                    Double passRate = numberOrNull(result, 5);
+                    data = new ReportData(generatedAt, passThreshold, students, teachers, quizzes, published,
+                            archivedQuizzes, attempts, submitted, scored, average, lowest, highest, passRate);
+                }
+            }
+            connection.commit();
             return data;
         }
     }
-    ReportData snapshot(Connection c, int threshold) throws SQLException {
-        var students = accounts(c, "student");
-        var teachers = accounts(c, "teacher");
-        long quizzes, published, archived, attempts, submitted;
-        java.time.LocalDateTime generated;
-        try (var s = c.prepareStatement("""
-                SELECT datetime('now','localtime'),
-                (SELECT COUNT(*) FROM quizzes),
-                (SELECT COUNT(*) FROM quizzes WHERE status='published' AND archived_at IS NULL),
-                (SELECT COUNT(*) FROM quizzes WHERE archived_at IS NOT NULL),
-                (SELECT COUNT(*) FROM quiz_attempts),
-                (SELECT COUNT(*) FROM quiz_attempts WHERE status='submitted')
-                """)) {
-            s.setQueryTimeout(10);
-            try (var r = s.executeQuery()) {
-                r.next(); generated = r.getTimestamp(1).toLocalDateTime(); quizzes = r.getLong(2);
-                published = r.getLong(3); archived = r.getLong(4); attempts = r.getLong(5); submitted = r.getLong(6);
-            }
-        }
-        try (var s = c.prepareStatement("""
-                SELECT COUNT(*), AVG(100.0*r.score/r.total_points),
-                MIN(100.0*r.score/r.total_points), MAX(100.0*r.score/r.total_points),
-                AVG(CASE WHEN 100.0*r.score/r.total_points >= ? THEN 100.0 ELSE 0 END)
-                FROM quiz_results r JOIN quiz_attempts a ON a.attempt_id=r.attempt_id
-                WHERE a.status='submitted' AND r.total_points>0
-                """)) {
-            s.setQueryTimeout(10); s.setInt(1, threshold);
-            try (var r = s.executeQuery()) {
-                r.next(); return new ReportData(generated, threshold, students, teachers, quizzes, published,
-                        archived, attempts, submitted, r.getLong(1), number(r, 2), number(r, 3), number(r, 4), number(r, 5));
+
+    /** Total, active, inactive and archived accounts for one role. */
+    private ReportData.Accounts accounts(Connection connection, String role) throws SQLException {
+        String sql = "SELECT COUNT(*), "
+                + "COALESCE(SUM(is_active = 1 AND archived_at IS NULL), 0), "
+                + "COALESCE(SUM(is_active = 0 AND archived_at IS NULL), 0), "
+                + "COALESCE(SUM(archived_at IS NOT NULL), 0) "
+                + "FROM users WHERE role = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, role);
+            try (ResultSet result = statement.executeQuery()) {
+                result.next();
+                return new ReportData.Accounts(result.getLong(1), result.getLong(2), result.getLong(3), result.getLong(4));
             }
         }
     }
-    private ReportData.Accounts accounts(Connection c, String role) throws SQLException {
-        try (var s = c.prepareStatement("""
-                SELECT COUNT(*), COALESCE(SUM(is_active=TRUE AND archived_at IS NULL),0),
-                COALESCE(SUM(is_active=FALSE AND archived_at IS NULL),0), COALESCE(SUM(archived_at IS NOT NULL),0)
-                FROM users WHERE role=?
-                """)) {
-            s.setQueryTimeout(10); s.setString(1, role);
-            try (var r = s.executeQuery()) { r.next(); return new ReportData.Accounts(r.getLong(1), r.getLong(2), r.getLong(3), r.getLong(4)); }
+
+    private long count(Connection connection, String sql) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet result = statement.executeQuery()) {
+            result.next();
+            return result.getLong(1);
         }
     }
-    private Double number(ResultSet r, int column) throws SQLException { double n = r.getDouble(column); return r.wasNull() ? null : n; }
+
+    private LocalDateTime now(Connection connection) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("SELECT datetime('now', 'localtime')");
+                ResultSet result = statement.executeQuery()) {
+            result.next();
+            return result.getTimestamp(1).toLocalDateTime();
+        }
+    }
+
+    /** SQL averages are NULL when there are no rows; the report shows that as N/A. */
+    private Double numberOrNull(ResultSet result, int column) throws SQLException {
+        double value = result.getDouble(column);
+        if (result.wasNull()) {
+            return null;
+        }
+        return value;
+    }
 }

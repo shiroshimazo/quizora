@@ -1,196 +1,386 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+
+/**
+ *
+ * @author Jeremy
+ */
+
 package quizora.DAO;
 
-import java.sql.*;
-import java.time.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import quizora.auth.AuthenticatedUser;
 import quizora.database.databaseConnection;
 
-/** Owns attempt authorization, deadlines, saved answers, and atomic grading. */
+/**
+ * Taking a quiz: starting or resuming an attempt, saving answers, the time limit, and scoring.
+ * Every method locks the database first so two saves or submits for the same attempt cannot overlap.
+ */
 public final class TakeQuizDAO {
+
+    /** A quiz in the Take Quiz drop-down. */
     public record Choice(long id, String title, String subject, int minutes, boolean resume) {
-        @Override public String toString() { return title + " — " + subject + (resume ? " (resume)" : ""); }
+        @Override
+        public String toString() {
+            String text = title + " — " + subject;
+            if (resume) {
+                text = text + " (resume)";
+            }
+            return text;
+        }
     }
+
+    /** One question with its four options and the student's saved answer (null when unanswered). */
     public record Question(long id, String text, List<String> options, int points, String answer) { }
+
     public record Score(long earned, long possible) { }
+
+    /** An attempt in progress, or a finished one when score is not null. */
     public record Attempt(long id, long quizId, String title, LocalDateTime deadline,
             List<Question> questions, Score score) { }
-    private record Header(long quizId, String title, LocalDateTime started, LocalDateTime deadline, boolean submitted) { }
+
+    /** The parts of an attempt needed to check access, the deadline and whether it is finished. */
+    private record AttemptInfo(long quizId, String title, LocalDateTime started, LocalDateTime deadline, boolean submitted) { }
+
     private static final DateTimeFormatter SQL_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private final userDAO.Connections connections;
     private final Clock clock;
-    public TakeQuizDAO() { this(databaseConnection::getConnection, Clock.systemDefaultZone()); }
-    public TakeQuizDAO(userDAO.Connections connections, Clock clock) { this.connections = connections; this.clock = clock; }
-    @FunctionalInterface private interface Work<T> { T run(Connection connection) throws SQLException; }
 
-    // Acquire SQLite's write lock before reading so concurrent starts/submits cannot race.
-    private <T> T transaction(AuthenticatedUser user, Work<T> work) throws SQLException {
-        if (user == null || !"student".equals(user.role())) throw new SecurityException("Student access is required.");
-        try (var connection = connections.open(); var control = connection.createStatement()) {
-            control.execute("PRAGMA busy_timeout=5000");
-            control.execute("PRAGMA foreign_keys=ON");
-            control.execute("BEGIN IMMEDIATE");
+    public TakeQuizDAO() {
+        this(databaseConnection::getConnection, Clock.systemDefaultZone());
+    }
+
+    public TakeQuizDAO(userDAO.Connections connections, Clock clock) {
+        this.connections = connections;
+        this.clock = clock;
+    }
+
+    // ---------- Public actions ----------
+
+    /** Quizzes the student can start, plus any quiz they already started (marked "resume"). */
+    public List<Choice> choices(AuthenticatedUser student) throws SQLException {
+        String sql = "SELECT q.quiz_id, q.title, s.subject_name, q.time_limit_minutes, "
+                + "EXISTS (SELECT 1 FROM quiz_attempts a WHERE a.quiz_id = q.quiz_id "
+                + "AND a.student_id = ? AND a.status = 'in_progress') AS resume "
+                + "FROM quizzes q JOIN subjects s ON s.subject_id = q.subject_id "
+                + "WHERE (q.status = 'published' AND q.archived_at IS NULL AND s.archived_at IS NULL "
+                + "AND EXISTS (SELECT 1 FROM questions x WHERE x.quiz_id = q.quiz_id)) "
+                + "OR EXISTS (SELECT 1 FROM quiz_attempts a WHERE a.quiz_id = q.quiz_id "
+                + "AND a.student_id = ? AND a.status = 'in_progress') "
+                + "ORDER BY resume DESC, q.updated_at DESC, q.quiz_id DESC";
+        try (Connection connection = connections.open()) {
+            beginWrite(connection);
             try {
-                try (var statement = connection.prepareStatement("SELECT 1 FROM users WHERE user_id=? AND role='student' AND is_active=1 AND archived_at IS NULL")) {
-                    statement.setLong(1,user.id());
-                    try (var rows = statement.executeQuery()) {
-                        if (!rows.next()) throw new SecurityException("Student access is required.");
+                AccessCheck.requireStudent(connection, student);
+                List<Choice> choices = new ArrayList<>();
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    statement.setLong(1, student.id());
+                    statement.setLong(2, student.id());
+                    try (ResultSet result = statement.executeQuery()) {
+                        while (result.next()) {
+                            choices.add(new Choice(
+                                    result.getLong("quiz_id"),
+                                    result.getString("title"),
+                                    result.getString("subject_name"),
+                                    result.getInt("time_limit_minutes"),
+                                    result.getBoolean("resume")));
+                        }
                     }
                 }
-                T value = work.run(connection);
-                control.execute("COMMIT");
-                return value;
-            } catch (SQLException | RuntimeException failure) {
-                try { control.execute("ROLLBACK"); } catch (SQLException rollback) { failure.addSuppressed(rollback); }
-                throw failure;
+                execute(connection, "COMMIT");
+                return choices;
+            } catch (SQLException | RuntimeException error) {
+                rollback(connection);
+                throw error;
             }
         }
     }
 
-    public List<Choice> choices(AuthenticatedUser user) throws SQLException {
-        return transaction(user, connection -> {
-            List<Choice> choices = new ArrayList<>();
-            try (var statement = connection.prepareStatement("""
-                    SELECT q.quiz_id,q.title,s.subject_name,q.time_limit_minutes,
-                        EXISTS(SELECT 1 FROM quiz_attempts a WHERE a.quiz_id=q.quiz_id AND a.student_id=? AND a.status='in_progress') AS resume
-                    FROM quizzes q JOIN subjects s ON s.subject_id=q.subject_id
-                    WHERE (q.status='published' AND q.archived_at IS NULL AND s.archived_at IS NULL
-                        AND EXISTS(SELECT 1 FROM questions x WHERE x.quiz_id=q.quiz_id))
-                        OR EXISTS(SELECT 1 FROM quiz_attempts a WHERE a.quiz_id=q.quiz_id AND a.student_id=? AND a.status='in_progress')
-                    ORDER BY resume DESC,q.updated_at DESC,q.quiz_id DESC
-                    """)) {
-                statement.setLong(1,user.id()); statement.setLong(2,user.id());
-                try (var rows = statement.executeQuery()) {
-                    while (rows.next()) choices.add(new Choice(rows.getLong(1),rows.getString(2),rows.getString(3),rows.getInt(4),rows.getBoolean(5)));
+    /** Resumes the student's unfinished attempt, or starts a new one if the quiz is still available. */
+    public Attempt open(AuthenticatedUser student, long quizId) throws SQLException {
+        try (Connection connection = connections.open()) {
+            beginWrite(connection);
+            try {
+                AccessCheck.requireStudent(connection, student);
+                long attemptId = findUnfinishedAttempt(connection, student.id(), quizId);
+                if (attemptId == 0) {
+                    checkQuizAvailable(connection, quizId);
+                    attemptId = startAttempt(connection, student.id(), quizId);
                 }
-            }
-            return List.copyOf(choices);
-        });
-    }
-
-    public Attempt open(AuthenticatedUser user, long quizId) throws SQLException {
-        return transaction(user, connection -> {
-            long attemptId = 0;
-            try (var statement = connection.prepareStatement("SELECT attempt_id FROM quiz_attempts WHERE quiz_id=? AND student_id=? AND status='in_progress' ORDER BY attempt_id LIMIT 1")) {
-                statement.setLong(1,quizId); statement.setLong(2,user.id());
-                try (var rows = statement.executeQuery()) { if (rows.next()) attemptId = rows.getLong(1); }
-            }
-            if (attemptId == 0) {
-                try (var statement = connection.prepareStatement("""
-                        SELECT 1 FROM quizzes q JOIN subjects s ON s.subject_id=q.subject_id
-                        WHERE q.quiz_id=? AND q.status='published' AND q.archived_at IS NULL AND s.archived_at IS NULL
-                            AND EXISTS(SELECT 1 FROM questions x WHERE x.quiz_id=q.quiz_id)
-                        """)) {
-                    statement.setLong(1,quizId);
-                    try (var rows = statement.executeQuery()) {
-                        if (!rows.next()) throw new IllegalArgumentException("This quiz is no longer available. Refresh the quiz list.");
-                    }
+                AttemptInfo info = attemptInfo(connection, student, attemptId);
+                if (!info.submitted() && isPastDeadline(info)) {
+                    finish(connection, attemptId, info);
                 }
-                try (var statement = connection.prepareStatement("INSERT INTO quiz_attempts(quiz_id,student_id,started_at) VALUES(?,?,?)",Statement.RETURN_GENERATED_KEYS)) {
-                    statement.setLong(1,quizId); statement.setLong(2,user.id());
-                    statement.setString(3,LocalDateTime.now(clock).format(SQL_TIME)); statement.executeUpdate();
-                    try (var keys = statement.getGeneratedKeys()) {
-                        if (!keys.next()) throw new SQLException("Attempt ID missing");
-                        attemptId = keys.getLong(1);
-                    }
-                }
-            }
-            Header header = header(connection,user,attemptId);
-            if (!header.submitted() && expired(header)) finish(connection,attemptId,header);
-            return read(connection,user,attemptId);
-        });
-    }
-
-    public Attempt save(AuthenticatedUser user, long attemptId, long questionId, String answer) throws SQLException {
-        if (answer != null && !Set.of("A","B","C","D").contains(answer)) throw new IllegalArgumentException("Select one of the four answers.");
-        return transaction(user, connection -> {
-            Header header = header(connection,user,attemptId);
-            if (header.submitted()) return read(connection,user,attemptId);
-            if (expired(header)) {
-                finish(connection,attemptId,header);
-                return read(connection,user,attemptId);
-            }
-            try (var statement = connection.prepareStatement("SELECT 1 FROM questions WHERE question_id=? AND quiz_id=?")) {
-                statement.setLong(1,questionId); statement.setLong(2,header.quizId());
-                try (var rows = statement.executeQuery()) {
-                    if (!rows.next()) throw new IllegalArgumentException("Question does not belong to this quiz.");
-                }
-            }
-            try (var statement = connection.prepareStatement("""
-                    INSERT INTO student_answers(attempt_id,question_id,quiz_id,selected_answer) VALUES(?,?,?,?)
-                    ON CONFLICT(attempt_id,question_id) DO UPDATE SET selected_answer=excluded.selected_answer
-                    """)) {
-                statement.setLong(1,attemptId); statement.setLong(2,questionId); statement.setLong(3,header.quizId());
-                statement.setString(4,answer); statement.executeUpdate();
-            }
-            return read(connection,user,attemptId);
-        });
-    }
-
-    public Attempt submit(AuthenticatedUser user, long attemptId) throws SQLException {
-        return transaction(user, connection -> {
-            Header header = header(connection,user,attemptId);
-            if (!header.submitted()) finish(connection,attemptId,header);
-            return read(connection,user,attemptId);
-        });
-    }
-
-    private boolean expired(Header header) { return !LocalDateTime.now(clock).isBefore(header.deadline()); }
-    private Header header(Connection connection, AuthenticatedUser user, long attemptId) throws SQLException {
-        try (var statement = connection.prepareStatement("""
-                SELECT q.quiz_id,q.title,a.started_at,q.time_limit_minutes,a.status
-                FROM quiz_attempts a JOIN quizzes q ON q.quiz_id=a.quiz_id WHERE a.attempt_id=? AND a.student_id=?
-                """)) {
-            statement.setLong(1,attemptId); statement.setLong(2,user.id());
-            try (var rows = statement.executeQuery()) {
-                if (!rows.next()) throw new SecurityException("This attempt is not available to your account.");
-                LocalDateTime started = LocalDateTime.parse(rows.getString(3),SQL_TIME);
-                return new Header(rows.getLong(1),rows.getString(2),started,started.plusMinutes(rows.getInt(4)),"submitted".equals(rows.getString(5)));
+                Attempt attempt = readAttempt(connection, student, attemptId);
+                execute(connection, "COMMIT");
+                return attempt;
+            } catch (SQLException | RuntimeException error) {
+                rollback(connection);
+                throw error;
             }
         }
     }
-    private void finish(Connection connection,long attemptId,Header header) throws SQLException {
-        try (var statement = connection.prepareStatement("""
-                INSERT INTO quiz_results(attempt_id,score,total_points)
-                SELECT ?,COALESCE(SUM(CASE WHEN a.selected_answer=q.correct_answer THEN q.points ELSE 0 END),0),SUM(q.points)
-                FROM questions q LEFT JOIN student_answers a ON a.question_id=q.question_id AND a.attempt_id=?
-                WHERE q.quiz_id=?
-                """)) {
-            statement.setLong(1,attemptId); statement.setLong(2,attemptId); statement.setLong(3,header.quizId());
+
+    /** Saves one answer (A, B, C or D), or clears it when answer is null. */
+    public Attempt save(AuthenticatedUser student, long attemptId, long questionId, String answer) throws SQLException {
+        if (answer != null && !answer.equals("A") && !answer.equals("B") && !answer.equals("C") && !answer.equals("D")) {
+            throw new IllegalArgumentException("Select one of the four answers.");
+        }
+        try (Connection connection = connections.open()) {
+            beginWrite(connection);
+            try {
+                AccessCheck.requireStudent(connection, student);
+                AttemptInfo info = attemptInfo(connection, student, attemptId);
+                if (!info.submitted()) {
+                    if (isPastDeadline(info)) {
+                        // Time is up: score what was already saved instead of accepting this answer.
+                        finish(connection, attemptId, info);
+                    } else {
+                        checkQuestionInQuiz(connection, questionId, info.quizId());
+                        saveAnswer(connection, attemptId, questionId, info.quizId(), answer);
+                    }
+                }
+                Attempt attempt = readAttempt(connection, student, attemptId);
+                execute(connection, "COMMIT");
+                return attempt;
+            } catch (SQLException | RuntimeException error) {
+                rollback(connection);
+                throw error;
+            }
+        }
+    }
+
+    /** Scores and finishes the attempt. Submitting twice is harmless. */
+    public Attempt submit(AuthenticatedUser student, long attemptId) throws SQLException {
+        try (Connection connection = connections.open()) {
+            beginWrite(connection);
+            try {
+                AccessCheck.requireStudent(connection, student);
+                AttemptInfo info = attemptInfo(connection, student, attemptId);
+                if (!info.submitted()) {
+                    finish(connection, attemptId, info);
+                }
+                Attempt attempt = readAttempt(connection, student, attemptId);
+                execute(connection, "COMMIT");
+                return attempt;
+            } catch (SQLException | RuntimeException error) {
+                rollback(connection);
+                throw error;
+            }
+        }
+    }
+
+    // ---------- Steps ----------
+
+    /** Returns the ID of the student's unfinished attempt for this quiz, or 0 if there is none. */
+    private long findUnfinishedAttempt(Connection connection, long studentId, long quizId) throws SQLException {
+        String sql = "SELECT attempt_id FROM quiz_attempts "
+                + "WHERE quiz_id = ? AND student_id = ? AND status = 'in_progress' "
+                + "ORDER BY attempt_id LIMIT 1";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, quizId);
+            statement.setLong(2, studentId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return result.getLong("attempt_id");
+                }
+                return 0;
+            }
+        }
+    }
+
+    private void checkQuizAvailable(Connection connection, long quizId) throws SQLException {
+        String sql = "SELECT q.quiz_id FROM quizzes q JOIN subjects s ON s.subject_id = q.subject_id "
+                + "WHERE q.quiz_id = ? AND q.status = 'published' AND q.archived_at IS NULL AND s.archived_at IS NULL "
+                + "AND EXISTS (SELECT 1 FROM questions x WHERE x.quiz_id = q.quiz_id)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, quizId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("This quiz is no longer available. Refresh the quiz list.");
+                }
+            }
+        }
+    }
+
+    private long startAttempt(Connection connection, long studentId, long quizId) throws SQLException {
+        String sql = "INSERT INTO quiz_attempts (quiz_id, student_id, started_at) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setLong(1, quizId);
+            statement.setLong(2, studentId);
+            statement.setString(3, LocalDateTime.now(clock).format(SQL_TIME));
+            statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                keys.next();
+                return keys.getLong(1);
+            }
+        }
+    }
+
+    private void checkQuestionInQuiz(Connection connection, long questionId, long quizId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT question_id FROM questions WHERE question_id = ? AND quiz_id = ?")) {
+            statement.setLong(1, questionId);
+            statement.setLong(2, quizId);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("Question does not belong to this quiz.");
+                }
+            }
+        }
+    }
+
+    /** Inserts the answer, or replaces the earlier answer to the same question. */
+    private void saveAnswer(Connection connection, long attemptId, long questionId, long quizId, String answer)
+            throws SQLException {
+        String sql = "INSERT INTO student_answers (attempt_id, question_id, quiz_id, selected_answer) VALUES (?, ?, ?, ?) "
+                + "ON CONFLICT (attempt_id, question_id) DO UPDATE SET selected_answer = excluded.selected_answer";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, attemptId);
+            statement.setLong(2, questionId);
+            statement.setLong(3, quizId);
+            statement.setString(4, answer);
             statement.executeUpdate();
         }
-        LocalDateTime submitted = LocalDateTime.now(clock);
-        if (submitted.isAfter(header.deadline())) submitted = header.deadline();
-        if (submitted.isBefore(header.started())) submitted = header.started();
-        try (var statement = connection.prepareStatement("UPDATE quiz_attempts SET status='submitted',submitted_at=? WHERE attempt_id=?")) {
-            statement.setString(1,submitted.format(SQL_TIME)); statement.setLong(2,attemptId); statement.executeUpdate();
-        }
     }
-    private Attempt read(Connection connection,AuthenticatedUser user,long attemptId) throws SQLException {
-        Header header = header(connection,user,attemptId);
-        List<Question> questions = new ArrayList<>();
-        try (var statement = connection.prepareStatement("""
-                SELECT q.question_id,q.question_text,q.option_a,q.option_b,q.option_c,q.option_d,q.points,a.selected_answer
-                FROM questions q LEFT JOIN student_answers a ON a.question_id=q.question_id AND a.attempt_id=?
-                WHERE q.quiz_id=? ORDER BY q.question_order,q.question_id
-                """)) {
-            statement.setLong(1,attemptId); statement.setLong(2,header.quizId());
-            try (var rows = statement.executeQuery()) {
-                while (rows.next()) questions.add(new Question(rows.getLong(1),rows.getString(2),
-                        List.of(rows.getString(3),rows.getString(4),rows.getString(5),rows.getString(6)),rows.getInt(7),rows.getString(8)));
+
+    private boolean isPastDeadline(AttemptInfo info) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        return !now.isBefore(info.deadline());
+    }
+
+    /** Loads the attempt; a student can only open their own attempts. */
+    private AttemptInfo attemptInfo(Connection connection, AuthenticatedUser student, long attemptId) throws SQLException {
+        String sql = "SELECT q.quiz_id, q.title, a.started_at, q.time_limit_minutes, a.status "
+                + "FROM quiz_attempts a JOIN quizzes q ON q.quiz_id = a.quiz_id "
+                + "WHERE a.attempt_id = ? AND a.student_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, attemptId);
+            statement.setLong(2, student.id());
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new SecurityException("This attempt is not available to your account.");
+                }
+                LocalDateTime started = LocalDateTime.parse(result.getString("started_at"), SQL_TIME);
+                LocalDateTime deadline = started.plusMinutes(result.getInt("time_limit_minutes"));
+                boolean submitted = result.getString("status").equals("submitted");
+                return new AttemptInfo(result.getLong("quiz_id"), result.getString("title"), started, deadline, submitted);
             }
         }
-        Score score = null;
-        if (header.submitted()) {
-            try (var statement = connection.prepareStatement("SELECT score,total_points FROM quiz_results WHERE attempt_id=?")) {
-                statement.setLong(1,attemptId);
-                try (var rows = statement.executeQuery()) {
-                    if (!rows.next()) throw new SQLException("Submitted attempt has no result");
-                    score = new Score(rows.getLong(1),rows.getLong(2));
+    }
+
+    /**
+     * Scores the attempt and marks it submitted. Each correct answer earns that question's points;
+     * unanswered questions earn zero. The submit time never goes past the deadline.
+     */
+    private void finish(Connection connection, long attemptId, AttemptInfo info) throws SQLException {
+        String scoreSql = "INSERT INTO quiz_results (attempt_id, score, total_points) "
+                + "SELECT ?, "
+                + "COALESCE(SUM(CASE WHEN a.selected_answer = q.correct_answer THEN q.points ELSE 0 END), 0), "
+                + "SUM(q.points) "
+                + "FROM questions q "
+                + "LEFT JOIN student_answers a ON a.question_id = q.question_id AND a.attempt_id = ? "
+                + "WHERE q.quiz_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(scoreSql)) {
+            statement.setLong(1, attemptId);
+            statement.setLong(2, attemptId);
+            statement.setLong(3, info.quizId());
+            statement.executeUpdate();
+        }
+
+        LocalDateTime submittedAt = LocalDateTime.now(clock);
+        if (submittedAt.isAfter(info.deadline())) {
+            submittedAt = info.deadline();
+        }
+        if (submittedAt.isBefore(info.started())) {
+            submittedAt = info.started();
+        }
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE quiz_attempts SET status = 'submitted', submitted_at = ? WHERE attempt_id = ?")) {
+            statement.setString(1, submittedAt.format(SQL_TIME));
+            statement.setLong(2, attemptId);
+            statement.executeUpdate();
+        }
+    }
+
+    /** The attempt with its questions in order, saved answers, and the score once submitted. */
+    private Attempt readAttempt(Connection connection, AuthenticatedUser student, long attemptId) throws SQLException {
+        AttemptInfo info = attemptInfo(connection, student, attemptId);
+
+        List<Question> questions = new ArrayList<>();
+        String questionSql = "SELECT q.question_id, q.question_text, q.option_a, q.option_b, q.option_c, q.option_d, "
+                + "q.points, a.selected_answer "
+                + "FROM questions q "
+                + "LEFT JOIN student_answers a ON a.question_id = q.question_id AND a.attempt_id = ? "
+                + "WHERE q.quiz_id = ? ORDER BY q.question_order, q.question_id";
+        try (PreparedStatement statement = connection.prepareStatement(questionSql)) {
+            statement.setLong(1, attemptId);
+            statement.setLong(2, info.quizId());
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    List<String> options = List.of(
+                            result.getString("option_a"),
+                            result.getString("option_b"),
+                            result.getString("option_c"),
+                            result.getString("option_d"));
+                    questions.add(new Question(
+                            result.getLong("question_id"),
+                            result.getString("question_text"),
+                            options,
+                            result.getInt("points"),
+                            result.getString("selected_answer")));
                 }
             }
         }
-        return new Attempt(attemptId,header.quizId(),header.title(),header.deadline(),List.copyOf(questions),score);
+
+        Score score = null;
+        if (info.submitted()) {
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "SELECT score, total_points FROM quiz_results WHERE attempt_id = ?")) {
+                statement.setLong(1, attemptId);
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
+                        throw new SQLException("Submitted attempt has no result");
+                    }
+                    score = new Score(result.getLong("score"), result.getLong("total_points"));
+                }
+            }
+        }
+        return new Attempt(attemptId, info.quizId(), info.title(), info.deadline(), questions, score);
+    }
+
+    // ---------- Locking ----------
+
+    /** Takes SQLite's write lock before reading, so concurrent starts and submits cannot race. */
+    private static void beginWrite(Connection connection) throws SQLException {
+        execute(connection, "PRAGMA busy_timeout = 5000");
+        execute(connection, "PRAGMA foreign_keys = ON");
+        execute(connection, "BEGIN IMMEDIATE");
+    }
+
+    private static void rollback(Connection connection) {
+        try {
+            execute(connection, "ROLLBACK");
+        } catch (SQLException ignored) {
+            // Keep the original error; it explains why the action failed.
+        }
+    }
+
+    private static void execute(Connection connection, String sql) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
     }
 }
