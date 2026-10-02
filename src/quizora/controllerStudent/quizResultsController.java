@@ -27,6 +27,8 @@ public class quizResultsController {
     private final StudentResultsDAO dao;
     private boolean busy,updating;
     private static final DateTimeFormatter DATE=DateTimeFormatter.ofPattern("MMM d, yyyy HH:mm");
+    /** At least half the points passes: 3/5 and 5/10 pass, 2/5 and 4/10 fail. */
+    private static final int PASSING_PERCENT=50;
     public quizResultsController(){this(new StudentResultsDAO());}
     public quizResultsController(StudentResultsDAO dao){this.dao=dao;}
     @FXML private void initialize(){
@@ -35,6 +37,7 @@ public class quizResultsController {
         column("Subject",160,ResultRecord::subject);
         column("Score",110,r->r.score()+" / "+r.total());
         column("Percentage",110,ResultRecord::percentage);
+        column("Result",100,r->r.passed(PASSING_PERCENT)?"Passed":"Failed");
         column("Submitted",190,ResultRecord::submittedAt);
         SortedList<ResultRecord> sorted=new SortedList<>(filtered);
         sorted.comparatorProperty().bind(resultsTable.comparatorProperty());resultsTable.setItems(sorted);

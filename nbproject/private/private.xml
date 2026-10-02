@@ -3,10 +3,28 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/Resources/fxml/authentication/register.fxml</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/Quizora.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/Resources/css/authentication.css</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/Resources/fxml/admin/reports.fxml</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/DAO/AdminProfileDAO.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/auth/AuthenticatedUser.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/auth/AuthenticationService.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/auth/GmailCodeSender.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/auth/PasswordHasher.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/auth/PasswordRecoveryService.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAdmin/ManagedAccountsController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAdmin/quizManagementController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAdmin/reportsController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAuthentication/forgotPasswordController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAuthentication/registerController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAuthentication/loginController.java</file>
             <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/database/databaseConnection.java</file>
-            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/database/CreateDemoAccounts.java</file>
-            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/smtp.local.properties</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/DAO/QuizStatisticsDAO.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/dashboard/PanelController.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/dashboard/PanelRouter.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/database/schema.sql</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAdmin/QuizEditor.java</file>
+            <file>file:/C:/Users/Jeremy/Documents/NetBeansProjects/quizora/src/quizora/controllerAdmin/adminDashboardController.java</file>
         </group>
     </open-files>
 </project-private>

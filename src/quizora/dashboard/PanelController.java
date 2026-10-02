@@ -125,6 +125,11 @@ public class PanelController implements Initializable {
         alert.initOwner(workspacePane.getScene().getWindow());
         if (alert.showAndWait().filter(ButtonType.OK::equals).isEmpty()) return;
         UserSession.clear();
+        Alert done = new Alert(Alert.AlertType.INFORMATION, "Logged out successfully.");
+        done.setTitle("Logout");
+        done.setHeaderText(null);
+        done.initOwner(workspacePane.getScene().getWindow());
+        done.showAndWait();
         new Quizora().start((Stage) workspacePane.getScene().getWindow());
     }
 }

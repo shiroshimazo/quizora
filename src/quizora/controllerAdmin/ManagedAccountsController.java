@@ -278,6 +278,8 @@ public class ManagedAccountsController implements Initializable {
                     password = creating ? editor.password() : null;
                 }
                 catch (IllegalArgumentException invalid) { editor.message(invalid.getMessage()); return; }
+                if (creating && !quizora.ui.ConfirmDialog.ask(save, wording("Add this student?"),
+                        "Name: " + changes.name() + "\nUsername: " + changes.username() + "\nEmail: " + changes.email())) return;
                 var identity = UserSession.current();
                 form.setDisable(true); save.setDisable(true); cancel.setDisable(true);
                 editor.message("Saving changes...");

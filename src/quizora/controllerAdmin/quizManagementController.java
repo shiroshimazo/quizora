@@ -62,7 +62,9 @@ public class quizManagementController {
         dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         dialog.setOnCloseRequest(e->{if(busy)e.consume();});
         if(!readOnly){ButtonType type=new ButtonType(original==null?"Add quiz":"Save changes",ButtonBar.ButtonData.OK_DONE);dialog.getDialogPane().getButtonTypes().add(0,type);Button save=(Button)dialog.getDialogPane().lookupButton(type);save.setId("saveQuizButton");save.addEventFilter(ActionEvent.ACTION,e->{e.consume();if(busy)return;try{
-            var changes=form.changes();var questions=form.questions();var admin=UserSession.current();form.setDisable(true);save.setDisable(true);dialog.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(true);message.setText("Saving quiz...");
+            var changes=form.changes();var questions=form.questions();
+            if(original==null&&!quizora.ui.ConfirmDialog.ask(save,"Add this quiz?","Title: "+changes.title()+"\nQuestions: "+questions.size()+"\nStatus: "+changes.state()))return;
+            var admin=UserSession.current();form.setDisable(true);save.setDisable(true);dialog.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(true);message.setText("Saving quiz...");
             run(()->dao.save(admin,original,changes,questions),q->{update(q);quizSearch.clear();quizStatusFilter.setValue("All statuses");quizTable.getSelectionModel().select(q);quizTable.scrollTo(q);quizMessage.setText("Quiz saved successfully.");dialog.close();},failure->{form.setDisable(false);save.setDisable(false);dialog.getDialogPane().lookupButton(ButtonType.CANCEL).setDisable(false);message.setText(error(failure));});
         }catch(IllegalArgumentException invalid){message.setText(invalid.getMessage());}});}
         dialog.showAndWait();

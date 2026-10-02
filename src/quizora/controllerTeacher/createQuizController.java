@@ -67,6 +67,9 @@ public class createQuizController implements Initializable {
             questions=editor.questions();
             if(state.equals("published")&&questions.isEmpty())throw new IllegalArgumentException("Add at least one complete question before publishing.");
         }catch(IllegalArgumentException ex){message(ex.getMessage(),true);return;}
+        boolean draft=state.equals("draft");
+        if(!quizora.ui.ConfirmDialog.ask(editorPane,draft?"Save this quiz as a draft?":"Publish this quiz?",
+                "Title: "+changes.title()+"\nQuestions: "+questions.size()+(draft?"\nStudents will not see a draft.":"\nStudents can take it right after publishing.")))return;
         setBusy(true);message(state.equals("draft")?"Saving draft...":"Publishing quiz...",false);
         var task=new Task<QuizRecord>() {
             @Override protected QuizRecord call()throws Exception{return new QuizManagementDAO().createForTeacher(identity,changes,questions);}
